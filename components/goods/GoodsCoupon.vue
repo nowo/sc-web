@@ -1,12 +1,12 @@
+<script lang="ts" setup>
+
+</script>
+
 <template>
     <div class="coupon-pane">
         <slot />
     </div>
 </template>
-
-<script lang="ts" setup>
-
-</script>
 
 <style lang="scss">
 .coupon-pane {

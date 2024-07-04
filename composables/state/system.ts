@@ -121,10 +121,10 @@ export const useUserState = () => {
     }
 
     /**
-   * 获取用户信息
-   * @param update boolean value 是否获取最新数据，默认false
-   * @returns
-   */
+     * 获取用户信息
+     * @param update boolean value 是否获取最新数据，默认false
+     * @returns
+     */
     const getUserInfo = async (update?: boolean) => {
         // 获取最新数据
         if (update) return await getUserData()

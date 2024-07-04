@@ -1,3 +1,117 @@
+<script setup lang="ts">
+import type { FormInstance, FormRules } from 'element-plus'
+import { LeaveWordApi } from '~/api/user/leaveWord'
+
+const defData = reactive({
+    skeleton: true,
+    typeList: [
+        {
+            value: 1,
+            label: '建议',
+        },
+        {
+            value: 2,
+            label: '投诉',
+        },
+        {
+            value: 3,
+            label: '商品',
+        },
+        {
+            value: 4,
+            label: '其他',
+        },
+        {
+            value: 5,
+            label: '店铺投诉',
+        },
+        {
+            value: 6,
+            label: '订单问题',
+        },
+    ],
+    visible: false,
+    btnLoading: false,
+})
+const formRef = ref<FormInstance>()
+const form = reactive({
+    content: '',
+    type: '',
+})
+
+// 规则
+const rules = reactive<FormRules>({
+    content: [
+        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    type: [{ required: true, message: '必填项不能为空', trigger: 'blur' }],
+})
+
+type TableDataItem = LeaveWordApi_GetListResponse['lists'][0]
+const tableData = reactive<BaseTableDataType<TableDataItem>>({
+    data: [],
+    tableHeader: [
+        { property: 'type', label: '类型', width: 120, align: 'center', slot: true },
+        { property: 'content', label: '留言内容', minWidth: 150 },
+        { property: 'add_time', label: '留言时间', width: 160, slot: true },
+        { property: 'is_reply', label: '是否回复', width: 85, align: 'center', slot: true },
+        { property: 'reply_content', label: '回复内容', width: 175 },
+        { property: 'reply_time', label: '回复时间', width: 160, align: 'center', slot: true },
+        // { property: 'operate', label: '操作', width: 100, align: 'center', slot: true, fixed: 'right' },
+    ],
+    pagination: {
+        ...PAGINATION,
+    },
+})
+
+const initTableData = async () => {
+    const data: LeaveWordApi_GetList = {
+        is_paging: 1,
+        page: tableData.pagination.page,
+        page_size: tableData.pagination.page_size,
+    }
+    const res = await LeaveWordApi.getList(data)
+    await wait(10)
+    defData.skeleton = false
+    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
+
+    tableData.data = res.data.value.data.lists
+    tableData.pagination.total = res.data.value.data.total
+}
+initTableData()
+
+// 新增  确定
+const onClick = async () => {
+    const isRun = await useFormVerify(formRef.value)
+    if (!isRun) return false
+    const data: LeaveWordApi_Add = {
+        type: Number(form.type),
+        content: form.content,
+    }
+    const res = await LeaveWordApi.add(data)
+    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
+    ElMessage.success('新增成功')
+    initTableData()
+    defData.visible = false
+}
+
+// 关闭弹窗
+const onClose = () => {
+    defData.visible = false
+    formRef.value?.resetFields()
+}
+
+// 分页跳转
+const onHandleCurrentChange = () => {
+    initTableData()
+}
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <LayoutUser>
         <el-skeleton :loading="defData.skeleton" animated>
@@ -76,118 +190,5 @@
         </el-skeleton>
     </LayoutUser>
 </template>
-
-<script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
-import { LeaveWordApi } from '~/api/user/leaveWord'
-
-const defData = reactive({
-    skeleton: true,
-    typeList: [
-        {
-            value: 1,
-            label: '建议',
-        },
-        {
-            value: 2,
-            label: '投诉',
-        },
-        {
-            value: 3,
-            label: '商品',
-        },
-        {
-            value: 4,
-            label: '其他',
-        },
-        {
-            value: 5,
-            label: '店铺投诉',
-        },
-        {
-            value: 6,
-            label: '订单问题',
-        },
-    ],
-    visible: false,
-    btnLoading: false,
-})
-const formRef = ref<FormInstance>()
-const form = reactive({
-    content: '',
-    type: '',
-})
-
-// 规则
-const rules = reactive<FormRules>({
-    content: [
-        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' }],
-    type: [{ required: true, message: '必填项不能为空', trigger: 'blur' }],
-})
-
-type TableDataItem = LeaveWordApi_GetListResponse['lists'][0]
-const tableData = reactive<BaseTableDataType<TableDataItem>>({
-    data: [],
-    tableHeader: [
-        { property: 'type', label: '类型', width: 120, align: 'center', slot: true },
-        { property: 'content', label: '留言内容', minWidth: 150 },
-        { property: 'add_time', label: '留言时间', width: 160, slot: true },
-        { property: 'is_reply', label: '是否回复', width: 85, align: 'center', slot: true },
-        { property: 'reply_content', label: '回复内容', width: 175 },
-        { property: 'reply_time', label: '回复时间', width: 160, align: 'center', slot: true },
-        // { property: 'operate', label: '操作', width: 100, align: 'center', slot: true, fixed: 'right' },
-    ],
-    pagination: {
-        ...PAGINATION,
-    },
-})
-
-const initTableData = async () => {
-    const data: LeaveWordApi_GetList = {
-        is_paging: 1,
-        page: tableData.pagination.page,
-        page_size: tableData.pagination.page_size,
-    }
-    const res = await LeaveWordApi.getList(data)
-    await wait(10)
-    defData.skeleton = false
-    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
-
-    tableData.data = res.data.value.data.lists
-    tableData.pagination.total = res.data.value.data.total
-}
-initTableData()
-
-// 新增  确定
-const onClick = async () => {
-    const isRun = await useFormVerify(formRef.value)
-    if (!isRun) return false
-    const data: LeaveWordApi_Add = {
-        type: Number(form.type),
-        content: form.content,
-    }
-    const res = await LeaveWordApi.add(data)
-    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
-    ElMessage.success('新增成功')
-    initTableData()
-    defData.visible = false
-}
-
-// 关闭弹窗
-const onClose = () => {
-    defData.visible = false
-    formRef.value?.resetFields()
-}
-
-// 分页跳转
-const onHandleCurrentChange = () => {
-    initTableData()
-}
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style scoped></style>

@@ -1,5 +1,21 @@
 <!-- 个人信息 -->
 
+<script lang="ts" setup>
+const userState = useUserState()
+const user = await userState.getUserInfo()
+// console.log('userData :>> ', userData)
+
+// 头像
+const faceImg = computed(() => user.value?.headimgurl || '')
+
+/**
+ * 退出登录
+ */
+const onLoginOut = () => {
+    useLoginOut()
+}
+</script>
+
 <template>
     <div class="user-card p15px">
         <div class="user-welcome">
@@ -98,22 +114,6 @@
         </div>
     </div>
 </template>
-
-<script lang="ts" setup>
-const userState = useUserState()
-const user = await userState.getUserInfo()
-// console.log('userData :>> ', userData)
-
-// 头像
-const faceImg = computed(() => user.value?.headimgurl || '')
-
-/**
- * 退出登录
- */
-const onLoginOut = () => {
-    useLoginOut()
-}
-</script>
 
 <style lang="scss" scoped>
 .user-card {

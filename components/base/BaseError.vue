@@ -1,3 +1,7 @@
+<script setup lang="ts">
+
+</script>
+
 <template>
     <div p="x4 y10" text="center #888 dark:gray-200">
         <div mt10px text-72px>
@@ -23,7 +27,3 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-
-</script>

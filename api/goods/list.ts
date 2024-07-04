@@ -42,19 +42,19 @@ export const GoodsApi = {
      * 加入购物车操作 - 检查是否允许加入购物车中的商品，并根据条
      * @returns
      */
-    addCart: (data: { goods_id: number; goods_number: number }) => useHttp('/api/mall/add_cart', data, { method: 'post' }),
+    addCart: (data: { goods_id: number, goods_number: number }) => useHttp('/api/mall/add_cart', data, { method: 'post' }),
 
     /**
      * 修改购物车商品数量 id:购物车id   number:商品修改数量
      * @returns
      */
-    editNum: (data: { id: number; number: number }) => useHttp<{ 'number': number; 'goods_number': number }>('/api/mall/add_sub_cart', data, { method: 'post' }),
+    editNum: (data: { id: number, number: number }) => useHttp<{ number: number, goods_number: number }>('/api/mall/add_sub_cart', data, { method: 'post' }),
 
     /**
      * 首页获取购物车商品数量
      * @returns
      */
-    cartNum: () => useHttp<{ 'number': number }>('/api/mall/get_goods_number', '', { method: 'get' }),
+    cartNum: () => useHttp<{ number: number }>('/api/mall/get_goods_number', '', { method: 'get' }),
 
     /**
      * 删除购物车商品 id 可多个删除  使用,拼接

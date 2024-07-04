@@ -1,21 +1,5 @@
 <!-- 轮播图 swiper v10.0.4 -->
 
-<template>
-    <swiper-container v-if="CLIENT" class="swp-banner" :slides-per-view="1" :centered-slides="true" :pagination="true"
-        :loop="true" :autoplay="{ delay: 6000,
-                                  disableOnInteraction: false }" :speed="1500" effect="fade" @progress="onProgress"
-        @slidechange="onSlideChange">
-        <!-- <swiper-slide>Slide 1</swiper-slide>
-        <swiper-slide>Slide 2</swiper-slide>
-        <swiper-slide>Slide 3</swiper-slide> -->
-        <swiper-slide v-for="item in defData.bannerList" :key="item.ad_id">
-            <NuxtLink :to="item.ad_link">
-                <img class="im" :src="item.ad_img" alt="">
-            </NuxtLink>
-        </swiper-slide>
-    </swiper-container>
-</template>
-
 <script lang="ts" setup>
 import { register } from 'swiper/element/bundle'
 
@@ -45,6 +29,22 @@ if (!error.value && banner.value?.code === 200) {
     defData.bannerList = banner.value.data.lists
 }
 </script>
+
+<template>
+    <swiper-container v-if="CLIENT" class="swp-banner" :slides-per-view="1" :centered-slides="true" :pagination="true"
+        :loop="true" :autoplay="{ delay: 6000,
+                                  disableOnInteraction: false }" :speed="1500" effect="fade" @progress="onProgress"
+        @slidechange="onSlideChange">
+        <!-- <swiper-slide>Slide 1</swiper-slide>
+        <swiper-slide>Slide 2</swiper-slide>
+        <swiper-slide>Slide 3</swiper-slide> -->
+        <swiper-slide v-for="item in defData.bannerList" :key="item.ad_id">
+            <NuxtLink :to="item.ad_link">
+                <img class="im" :src="item.ad_img" alt="">
+            </NuxtLink>
+        </swiper-slide>
+    </swiper-container>
+</template>
 
 <style lang="scss" scoped>
 .swp-banner {

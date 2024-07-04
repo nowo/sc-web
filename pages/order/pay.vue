@@ -1,3 +1,230 @@
+<script lang="ts" setup>
+import QRCode from 'qrcode'
+import { OrderApi } from '~/api/goods/order'
+
+const usePayType = usePayTypeState()
+// 支持的支付方式
+const payTypeList = await usePayType.getPayTypeList()
+// console.log('payTypeList :>> ', payTypeList)
+
+// const alipayRef = ref<HTMLDivElement>()
+
+// 获取商城信息
+const { getSystemInfo } = useSystemState()
+const systemInfo = await getSystemInfo()
+
+const defData = reactive({
+    skeleton: true, // 默认打开骨架屏
+    ready: true,
+
+    orderInfo: {} as OrderApi_GetInfoResponse | undefined, // 订单信息
+    payInfo: {} as OrderApi_PayOrderResponse['bank_info'] | undefined, // 支付信息(线下支付)
+    endTime: 0, // 支付截至时间
+    countDown: { // 倒计时
+        day: '', // 天
+        hour: '', // 时
+        minute: '', // 分
+        second: '', // 秒
+        flag: false,
+    },
+    submit: false,
+    visibleChat: false,
+    chatPayUrl: '', // 微信返回的支付地址
+    update: false, // 是否重新获取订单详情
+    visibleAli: false, // 支付宝显示隐藏
+    aliData: '', // 支付宝返回的form表单代码
+    tim: 0 as any, // 支付宝定时器
+})
+
+const form = reactive({
+    payType: '' as '' | 1 | 2 | 3,
+})
+
+// 订单编号
+const order_no = computed(() => {
+    return useRouteQuery('out_trade_no').value || useRouteQuery('order_no').value
+})
+
+// 支付状态
+const payStatus = computed(() => defData.orderInfo!.order_status)
+
+// 微信图标图片
+const wxImg = computed(() => {
+    const node = payTypeList.value.find(item => item.type === 1)
+    return node?.ico_url
+})
+
+
+/**
+ * 设置倒计时
+ */
+ const setCountDown = () => {
+    const timestamp = defData.endTime
+    if (!timestamp) return
+    const timer = setInterval(() => {
+        const nowTime = new Date()
+        const endTime = new Date(timestamp * 1000)
+        const t = endTime.getTime() - nowTime.getTime()
+        if (t > 0) {
+            const d = Math.floor(t / 86400000)
+            const h = Math.floor((t / 3600000) % 24)
+            const m = Math.floor((t / 60000) % 60)
+            const s = Math.floor((t / 1000) % 60)
+            const hh = h < 10 ? `0${h}` : h
+            const mm = m < 10 ? `0${m}` : m
+            const ss = s < 10 ? `0${s}` : s
+
+            defData.countDown.day = d.toString()
+            defData.countDown.hour = hh.toString()
+            defData.countDown.minute = mm.toString()
+            defData.countDown.second = ss.toString()
+
+            // const format = `(请在<span>${d}</span>天<span>${hh}</span>小时<span>${mm}</span>分<span>${ss}</span>秒 内完成付款，否则订单将自动取消! )`
+            // if (d > 0) {
+            //     format = `${d}天${hh}小时${mm}分${ss}秒`
+            // }
+            // if (d <= 0 && Number(hh) > 0) {
+            //     format = `${hh}小时${mm}分${ss}秒`
+            // }
+            // if (d <= 0 && Number(hh) <= 0) {
+            //     format = `${mm}分${ss}秒`
+            // }
+        } else {
+            // 关闭倒计时，
+            clearInterval(timer)
+            defData.countDown.flag = true
+            // defData.orderInfo!.order_status=7
+        }
+    }, 1000)
+}
+
+
+// 获取订单信息 // 查询支付状态
+const initDefaultData = async () => {
+    if (!order_no.value) {
+        defData.ready = false
+        defData.skeleton = false
+        return
+    }
+
+    const { data: res, error } = await useFetch<OrderDetailInfoData>('/api/order/info', {
+        method: 'post',
+        body: { main_order_no: order_no.value },
+    })
+
+    // await wait(200)
+
+    // 线下支付
+    if (res.value?.info.pay_type === 3) {
+        defData.endTime = res.value.info.end_time || 0
+        defData.payInfo = res.value.info.bank_info
+        setCountDown()
+    }
+    await wait(450)
+
+    defData.skeleton = false
+    if (error.value) return
+    if (res.value?.code !== 200) {
+        ElMessage.error(res.value?.msg)
+        return defData.ready = false
+    }
+
+    defData.orderInfo = res.value!.info
+}
+
+
+// 关闭支付宝支付弹窗
+const onCloseAlipay = () => {
+    defData.visibleAli = false
+    clearInterval(defData.tim)
+}
+
+// 关闭微信支付弹窗
+const onCloseWechatPay = () => {
+    defData.visibleChat = false
+    clearInterval(defData.tim)
+}
+
+// 支付
+const onPayment = async () => {
+    if (!order_no.value) return
+    if (!form.payType) return ElMessage.error('请选择支付方式')// 验证选择的支付方式是否选择了支付方式
+    defData.submit = true
+    const { data: res, error } = await OrderApi.payOrder({ main_order_no: order_no.value, pay_type: form.payType })
+    defData.submit = false
+    if (error.value) return
+    // console.log('res :>> ', res)
+    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
+
+    if (form.payType === 1) {
+        const dat = res.value?.data as OrderApi_PayOrderWeChatResponse
+        const url = dat.code_url
+        // const url = dat.code_url ? `${dat.code_url}&_tcs=${Date.now()}` : ''
+        if (!url) return ElMessage.error('未获取到付款码，请稍后再试')
+        defData.chatPayUrl = await QRCode.toDataURL(url, { margin: 2 })
+
+        defData.visibleChat = true
+
+        // 监听微信支付是否完成
+        defData.tim = setInterval(async () => {
+            await initDefaultData()
+            if (payStatus.value > 1) onCloseWechatPay() // 关闭 支付及弹窗
+        }, 2500)
+
+        return
+    }
+
+    if (form.payType === 2) { // 支付宝支付
+        defData.visibleAli = true
+
+        defData.aliData = res.value?.data as string
+
+        defData.tim = setInterval(async () => {
+            await initDefaultData()
+            if (payStatus.value > 1) onCloseAlipay() // 关闭 支付及弹窗
+        }, 2500)
+
+        // nextTick(() => {
+        //     const form = alipayRef.value?.firstElementChild as HTMLFormElement
+        //     form.setAttribute('target', '_blank')
+        //     form.submit()
+        // })
+
+        // const aliPaySubmit = document.getElementById('alipaySubmit')
+        // if (aliPaySubmit) document.body.removeChild(aliPaySubmit)// 删除动态创建的按钮元素，防止隐藏按钮造成的
+        // const div = document.createElement('div')
+        // div.id = 'aliPaySubmit'
+        // div.innerHTML = res.value?.data
+        // document.body.appendChild(div)
+        // const form = div.firstElementChild as HTMLFormElement
+        // form.setAttribute('target', '_blank')
+        // form.submit()
+    }
+    // if (form.payType === 3) defData.status = 1
+}
+
+// 微信扫码支付关闭弹窗，查询订单是否支付完成了
+const onClose = async () => {
+    onCloseWechatPay()
+    await initDefaultData()
+
+    // if (defData.update) return
+    // defData.update = true
+
+    // await initDefaultData()
+
+    // defData.update = false
+}
+
+
+initDefaultData()
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <section>
         <div class="container">
@@ -24,7 +251,7 @@
                             class="flex flex-wrap p5px">
                             <div class="flex-1">
                                 <div class="pay-ready text-center">
-                                    <el-alert type="success" :closable="false" center show-icon>
+                                    <el-alert type="success" :closable="false" show-icon center>
                                         <div class="text-16px -mt5px">
                                             订单已提交成功，请您及时付款，我们将尽快为您安排发货!
                                         </div>
@@ -140,7 +367,7 @@
                                     </div>
                                     <el-descriptions class="wx-table p20px" :column="1" border>
                                         <el-descriptions-item label="交易金额" label-align="right" label-class-name="w130px ">
-                                            <strong class="text-18px lh-32px c-#f60">{{ defData.orderInfo?.meet_price
+                                            <strong class="text-18px c-#f60 lh-32px">{{ defData.orderInfo?.meet_price
                                             }}</strong> 元
                                         </el-descriptions-item>
                                         <el-descriptions-item label="支付方式" label-align="right">
@@ -179,229 +406,6 @@
         </div>
     </section>
 </template>
-
-<script lang="ts" setup>
-import QRCode from 'qrcode'
-import { OrderApi } from '~/api/goods/order'
-
-const usePayType = usePayTypeState()
-// 支持的支付方式
-const payTypeList = await usePayType.getPayTypeList()
-// console.log('payTypeList :>> ', payTypeList)
-
-// const alipayRef = ref<HTMLDivElement>()
-
-// 获取商城信息
-const { getSystemInfo } = useSystemState()
-const systemInfo = await getSystemInfo()
-
-const defData = reactive({
-    skeleton: true, // 默认打开骨架屏
-    ready: true,
-
-    orderInfo: {} as OrderApi_GetInfoResponse | undefined, // 订单信息
-    payInfo: {} as OrderApi_PayOrderResponse['bank_info'] | undefined, // 支付信息(线下支付)
-    endTime: 0, // 支付截至时间
-    countDown: { // 倒计时
-        day: '', // 天
-        hour: '', // 时
-        minute: '', // 分
-        second: '', // 秒
-        flag: false,
-    },
-    submit: false,
-    visibleChat: false,
-    chatPayUrl: '', // 微信返回的支付地址
-    update: false, // 是否重新获取订单详情
-    visibleAli: false, // 支付宝显示隐藏
-    aliData: '', // 支付宝返回的form表单代码
-    tim: 0 as any, // 支付宝定时器
-})
-
-const form = reactive({
-    payType: '' as '' | 1 | 2 | 3,
-})
-
-// 订单编号
-const order_no = computed(() => {
-    return useRouteQuery('out_trade_no').value || useRouteQuery('order_no').value
-})
-
-// 支付状态
-const payStatus = computed(() => defData.orderInfo!.order_status)
-
-// 微信图标图片
-const wxImg = computed(() => {
-    const node = payTypeList.value.find(item => item.type === 1)
-    return node?.ico_url
-})
-
-// 获取订单信息 // 查询支付状态
-const initDefaultData = async () => {
-    if (!order_no.value) {
-        defData.ready = false
-        defData.skeleton = false
-        return
-    }
-
-    const { data: res, error } = await useFetch<OrderDetailInfoData>('/api/order/info', {
-        method: 'post',
-        body: { main_order_no: order_no.value },
-    })
-
-    // await wait(200)
-
-    // 线下支付
-    if (res.value?.info.pay_type === 3) {
-        defData.endTime = res.value.info.end_time || 0
-        defData.payInfo = res.value.info.bank_info
-        setCountDown()
-    }
-    await wait(450)
-
-    defData.skeleton = false
-    if (error.value) return
-    if (res.value?.code !== 200) {
-        ElMessage.error(res.value?.msg)
-        return defData.ready = false
-    }
-
-    defData.orderInfo = res.value!.info
-}
-
-// 支付
-const onPayment = async () => {
-    if (!order_no.value) return
-    if (!form.payType) return ElMessage.error('请选择支付方式')// 验证选择的支付方式是否选择了支付方式
-    defData.submit = true
-    const { data: res, error } = await OrderApi.payOrder({ main_order_no: order_no.value, pay_type: form.payType })
-    defData.submit = false
-    if (error.value) return
-    // console.log('res :>> ', res)
-    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
-
-    if (form.payType === 1) {
-        const dat = res.value?.data as OrderApi_PayOrderWeChatResponse
-        const url = dat.code_url
-        // const url = dat.code_url ? `${dat.code_url}&_tcs=${Date.now()}` : ''
-        if (!url) return ElMessage.error('未获取到付款码，请稍后再试')
-        defData.chatPayUrl = await QRCode.toDataURL(url, { margin: 2 })
-
-        defData.visibleChat = true
-
-        // 监听微信支付是否完成
-        defData.tim = setInterval(async () => {
-            await initDefaultData()
-            if (payStatus.value > 1) onCloseWechatPay() // 关闭 支付及弹窗
-        }, 2500)
-
-        return
-    }
-
-    if (form.payType === 2) { // 支付宝支付
-        defData.visibleAli = true
-
-        defData.aliData = res.value?.data as string
-
-        defData.tim = setInterval(async () => {
-            await initDefaultData()
-            if (payStatus.value > 1) onCloseAlipay() // 关闭 支付及弹窗
-        }, 2500)
-
-        // nextTick(() => {
-        //     const form = alipayRef.value?.firstElementChild as HTMLFormElement
-        //     form.setAttribute('target', '_blank')
-        //     form.submit()
-        // })
-
-        // const aliPaySubmit = document.getElementById('alipaySubmit')
-        // if (aliPaySubmit) document.body.removeChild(aliPaySubmit)// 删除动态创建的按钮元素，防止隐藏按钮造成的
-        // const div = document.createElement('div')
-        // div.id = 'aliPaySubmit'
-        // div.innerHTML = res.value?.data
-        // document.body.appendChild(div)
-        // const form = div.firstElementChild as HTMLFormElement
-        // form.setAttribute('target', '_blank')
-        // form.submit()
-    }
-    // if (form.payType === 3) defData.status = 1
-}
-
-/**
- * 设置倒计时
- */
-const setCountDown = () => {
-    const timestamp = defData.endTime
-    if (!timestamp) return
-    const timer = setInterval(() => {
-        const nowTime = new Date()
-        const endTime = new Date(timestamp * 1000)
-        const t = endTime.getTime() - nowTime.getTime()
-        if (t > 0) {
-            const d = Math.floor(t / 86400000)
-            const h = Math.floor((t / 3600000) % 24)
-            const m = Math.floor((t / 60000) % 60)
-            const s = Math.floor((t / 1000) % 60)
-            const hh = h < 10 ? `0${h}` : h
-            const mm = m < 10 ? `0${m}` : m
-            const ss = s < 10 ? `0${s}` : s
-
-            defData.countDown.day = d.toString()
-            defData.countDown.hour = hh.toString()
-            defData.countDown.minute = mm.toString()
-            defData.countDown.second = ss.toString()
-
-            // const format = `(请在<span>${d}</span>天<span>${hh}</span>小时<span>${mm}</span>分<span>${ss}</span>秒 内完成付款，否则订单将自动取消! )`
-            // if (d > 0) {
-            //     format = `${d}天${hh}小时${mm}分${ss}秒`
-            // }
-            // if (d <= 0 && Number(hh) > 0) {
-            //     format = `${hh}小时${mm}分${ss}秒`
-            // }
-            // if (d <= 0 && Number(hh) <= 0) {
-            //     format = `${mm}分${ss}秒`
-            // }
-        } else {
-            // 关闭倒计时，
-            clearInterval(timer)
-            defData.countDown.flag = true
-            // defData.orderInfo!.order_status=7
-        }
-    }, 1000)
-}
-
-// 微信扫码支付关闭弹窗，查询订单是否支付完成了
-const onClose = async () => {
-    onCloseWechatPay()
-    await initDefaultData()
-
-    // if (defData.update) return
-    // defData.update = true
-
-    // await initDefaultData()
-
-    // defData.update = false
-}
-
-// 关闭支付宝支付弹窗
-const onCloseAlipay = () => {
-    defData.visibleAli = false
-    clearInterval(defData.tim)
-}
-
-// 关闭微信支付弹窗
-const onCloseWechatPay = () => {
-    defData.visibleChat = false
-    clearInterval(defData.tim)
-}
-
-initDefaultData()
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style lang="scss" scoped>
 .radio-box {

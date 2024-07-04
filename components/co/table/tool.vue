@@ -1,39 +1,3 @@
-<template>
-    <el-form v-if="searchData.config.length" ref="formRef" class="co-table-tool" v-bind="$attrs" :model="searchData.data">
-        <!-- :ref="setItemRef" -->
-        <!-- :ref="(el: FormItemInstance | any) => { if (el) formItemRef[index] = el }" -->
-        <el-form-item v-for="(item, index) in searchData.config" :key="index" ref="formItemRef"
-            :class="setFormItemClass(index)" v-bind="item.itemProp" :prop="item.itemProp.prop">
-            <div class="co-table-tool-content" :style="{ width: setElWidth(item.width) }">
-                <slot v-if="item.slot" :name="item.itemProp.prop" :row="searchData.data" :width="setElWidth(item.width)" />
-                <el-input v-else v-model.trim="searchData.data[item.itemProp.prop]"
-                    :style="{ width: setElWidth(item.width) }" :placeholder="item.placeholder" clearable />
-            </div>
-        </el-form-item>
-        <el-form-item ref="lastItemRef" label="">
-            <el-button type="primary" @click="onSearch">
-                <i class="i-ep-search mr4px h1em w1em" />
-                查询
-            </el-button>
-            <el-button @click="onReset">
-                <i class="i-ep-refresh mr4px h1em w1em" />
-                重置
-            </el-button>
-            <slot />
-            <el-button v-if="hideBtn === false" type="primary" link @click="onToggle">
-                <template v-if="defData.showAll">
-                    收起
-                    <i class="i-ep-arrow-up h1em w1em" />
-                </template>
-                <template v-else>
-                    展开
-                    <i class="i-ep-arrow-down h1em w1em" />
-                </template>
-            </el-button>
-        </el-form-item>
-    </el-form>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormItemInstance } from 'element-plus'
 
@@ -163,6 +127,42 @@ onMounted(() => {
     // })
 })
 </script>
+
+<template>
+    <el-form v-if="searchData.config.length" ref="formRef" class="co-table-tool" v-bind="$attrs" :model="searchData.data">
+        <!-- :ref="setItemRef" -->
+        <!-- :ref="(el: FormItemInstance | any) => { if (el) formItemRef[index] = el }" -->
+        <el-form-item v-for="(item, index) in searchData.config" :key="index" ref="formItemRef"
+            :class="setFormItemClass(index)" v-bind="item.itemProp" :prop="item.itemProp.prop">
+            <div class="co-table-tool-content" :style="{ width: setElWidth(item.width) }">
+                <slot v-if="item.slot" :name="item.itemProp.prop" :row="searchData.data" :width="setElWidth(item.width)" />
+                <el-input v-else v-model.trim="searchData.data[item.itemProp.prop]"
+                    :style="{ width: setElWidth(item.width) }" :placeholder="item.placeholder" clearable />
+            </div>
+        </el-form-item>
+        <el-form-item ref="lastItemRef" label="">
+            <el-button type="primary" @click="onSearch">
+                <i class="i-ep-search mr4px h1em w1em" />
+                查询
+            </el-button>
+            <el-button @click="onReset">
+                <i class="i-ep-refresh mr4px h1em w1em" />
+                重置
+            </el-button>
+            <slot />
+            <el-button v-if="hideBtn === false" type="primary" link @click="onToggle">
+                <template v-if="defData.showAll">
+                    收起
+                    <i class="i-ep-arrow-up h1em w1em" />
+                </template>
+                <template v-else>
+                    展开
+                    <i class="i-ep-arrow-down h1em w1em" />
+                </template>
+            </el-button>
+        </el-form-item>
+    </el-form>
+</template>
 
 <style lang="scss">
 .co-table-tool {

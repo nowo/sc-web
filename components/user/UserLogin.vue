@@ -1,73 +1,3 @@
-<template>
-    <div class="login-box">
-        <div class="login-tle">
-            <span :class="defData.type === 1 ? 'on' : ''" @click="setLoginType(1)">账号登录</span>
-            <el-divider direction="vertical" />
-            <span :class="defData.type === 2 ? 'on' : ''" @click="setLoginType(2)">验证码登录</span>
-        </div>
-        <el-form ref="formRef" label-width="auto" :model="form" :rules="rules" size="large">
-            <el-form-item prop="phone">
-                <el-input v-model="form.phone" placeholder="请输入手机号" tabindex="1">
-                    <template #prefix>
-                        <i class="i-ep-user" />
-                    </template>
-                </el-input>
-            </el-form-item>
-            <el-form-item v-if="defData.type === 1" prop="password">
-                <el-input v-model="form.password" placeholder="请输入密码" show-password tabindex="2">
-                    <template #prefix>
-                        <i class="i-ep-lock" />
-                    </template>
-                </el-input>
-            </el-form-item>
-            <el-form-item v-else prop="validate_code" class="h40px">
-                <el-col :span="15">
-                    <el-input v-model.trim="form.validate_code" type="text" placeholder="请输入短信验证码" clearable tabindex="3">
-                        <template #prefix>
-                            <i class="i-ep-message" />
-                        </template>
-                    </el-input>
-                </el-col>
-                <el-col :span="1" />
-                <el-col :span="8">
-                    <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
-                        获取验证码
-                    </el-button>
-                    <el-button v-else class="w100%">
-                        {{ defData.time }}秒
-                    </el-button>
-                </el-col>
-            </el-form-item>
-            <el-form-item prop="read" size="small">
-                <el-checkbox-group v-model="form.read">
-                    <el-checkbox label="我已阅读并同意" name="1" />
-                </el-checkbox-group>
-                <el-link type="primary" style="--el-link-font-size:12px;" @click="onOpenRead(1)">
-                    《工游记网站服务协议》
-                </el-link>
-                <el-link type="primary" style="--el-link-font-size:12px;" @click="onOpenRead(2)">
-                    《工游记隐私政策》
-                </el-link>
-            </el-form-item>
-
-            <el-form-item>
-                <el-button class="w100%" :loading="defData.btnLoading" @click="onLogin">
-                    {{ defData.type === 1 ? '登 录' : '进入工游记' }}
-                </el-button>
-                <NuxtLink to="/login/forgotPassword" target="_blank">
-                    忘记密码?
-                </NuxtLink>
-            </el-form-item>
-        </el-form>
-        <ClientOnly>
-            <el-dialog v-model="defData.visibleRead" auto-height width="1000px" :draggable="true" :title="readData.title"
-                destroy-on-close>
-                <div v-html="readData.content" />
-            </el-dialog>
-        </ClientOnly>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 import { LoginApi } from '~/api/login'
@@ -100,7 +30,7 @@ const form = reactive({
 const rules = reactive<FormRules>({
     phone: [
         { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
     ],
     password: [
         { required: true, whitespace: true, message: '请输入登录密码', trigger: 'blur' },
@@ -195,6 +125,76 @@ const onLogin = async () => {
     emits('update')
 }
 </script>
+
+<template>
+    <div class="login-box">
+        <div class="login-tle">
+            <span :class="defData.type === 1 ? 'on' : ''" @click="setLoginType(1)">账号登录</span>
+            <el-divider direction="vertical" />
+            <span :class="defData.type === 2 ? 'on' : ''" @click="setLoginType(2)">验证码登录</span>
+        </div>
+        <el-form ref="formRef" label-width="auto" :model="form" :rules="rules" size="large">
+            <el-form-item prop="phone">
+                <el-input v-model="form.phone" placeholder="请输入手机号" tabindex="1">
+                    <template #prefix>
+                        <i class="i-ep-user" />
+                    </template>
+                </el-input>
+            </el-form-item>
+            <el-form-item v-if="defData.type === 1" prop="password">
+                <el-input v-model="form.password" placeholder="请输入密码" show-password tabindex="2">
+                    <template #prefix>
+                        <i class="i-ep-lock" />
+                    </template>
+                </el-input>
+            </el-form-item>
+            <el-form-item v-else prop="validate_code" class="h40px">
+                <el-col :span="15">
+                    <el-input v-model.trim="form.validate_code" type="text" placeholder="请输入短信验证码" clearable tabindex="3">
+                        <template #prefix>
+                            <i class="i-ep-message" />
+                        </template>
+                    </el-input>
+                </el-col>
+                <el-col :span="1" />
+                <el-col :span="8">
+                    <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
+                        获取验证码
+                    </el-button>
+                    <el-button v-else class="w100%">
+                        {{ defData.time }}秒
+                    </el-button>
+                </el-col>
+            </el-form-item>
+            <el-form-item prop="read" size="small">
+                <el-checkbox-group v-model="form.read">
+                    <el-checkbox label="我已阅读并同意" name="1" />
+                </el-checkbox-group>
+                <el-link type="primary" style="--el-link-font-size:12px;" @click="onOpenRead(1)">
+                    《工游记网站服务协议》
+                </el-link>
+                <el-link type="primary" style="--el-link-font-size:12px;" @click="onOpenRead(2)">
+                    《工游记隐私政策》
+                </el-link>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button class="w100%" :loading="defData.btnLoading" @click="onLogin">
+                    {{ defData.type === 1 ? '登 录' : '进入工游记' }}
+                </el-button>
+                <NuxtLink to="/login/forgotPassword" target="_blank">
+                    忘记密码?
+                </NuxtLink>
+            </el-form-item>
+        </el-form>
+        <ClientOnly>
+            <el-dialog v-model="defData.visibleRead" auto-height width="1000px" :draggable="true" :title="readData.title"
+                destroy-on-close>
+                <div v-html="readData.content" />
+            </el-dialog>
+        </ClientOnly>
+    </div>
+</template>
 
 <style lang="scss">
 .login-box {

@@ -1,57 +1,3 @@
-<template>
-    <div class="min-h300px">
-        <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
-            auto-height scrollbar-always-on @update:page="onHandleCurrentChange">
-            <template #contentHeader>
-                {{ props.type === 1 ? '提问' : '回答' }}
-            </template>
-            <template #q_id="{ scopes }">
-                <el-button v-if="scopes.row.answer_lists?.length" type="warning" link size="small"
-                    @click="openView(scopes.row)">
-                    查看({{ scopes.row.answer_lists.length }})
-                </el-button>
-                <el-text v-else type="info" size="small">
-                    暂无回复
-                </el-text>
-            </template>
-
-            <template #goods_name="{ scopes }">
-                <NuxtLink :to="`/goods/${scopes.row.goods_sn}`" class="hover:c-#d7231e" target="_blank">
-                    {{ scopes.row.goods_name }}
-                </NuxtLink>
-            </template>
-            <template #type="{ scopes }">
-                我的{{ scopes.row.type === 1 ? '提问' : '回答' }}
-            </template>
-            <template #add_time="{ scopes }">
-                {{ formatTime(scopes.row.add_time) }}
-            </template>
-            <template #operate="{ scopes }">
-                <el-button type="primary" link size="small" @click="onDelete(scopes.row)">
-                    删除
-                </el-button>
-            </template>
-        </CoTable>
-        <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="defData.title"
-            :draggable="defData.replyData.length > 10 ? false : true" width="680px" @close="onClose" @cancel="onClose"
-            @confirm="onConfirm">
-            <ul class="pr10px">
-                <li v-for="item in defData.replyData" :key="item.question_id"
-                    class="flex b-b-1px b-b-#eee b-b-dashed py5px">
-                    <b class="w25px c-green">答:</b>
-                    <div class="flex-1">
-                        {{ item.content }}
-                    </div>
-                    <div class="w170px text-right">
-                        <span class="text-12px font-100"> {{ changeToStar(item.user_name) }}
-                            {{ formatTime(item.add_time) }}</span>
-                    </div>
-                </li>
-            </ul>
-        </CoDialog>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import { InterListApi } from '~/api/user/interList'
 
@@ -154,5 +100,59 @@ const onConfirm = async () => {
     onClose()
 }
 </script>
+
+<template>
+    <div class="min-h300px">
+        <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
+            auto-height scrollbar-always-on @update:page="onHandleCurrentChange">
+            <template #contentHeader>
+                {{ props.type === 1 ? '提问' : '回答' }}
+            </template>
+            <template #q_id="{ scopes }">
+                <el-button v-if="scopes.row.answer_lists?.length" type="warning" link size="small"
+                    @click="openView(scopes.row)">
+                    查看({{ scopes.row.answer_lists.length }})
+                </el-button>
+                <el-text v-else type="info" size="small">
+                    暂无回复
+                </el-text>
+            </template>
+
+            <template #goods_name="{ scopes }">
+                <NuxtLink :to="`/goods/${scopes.row.goods_sn}`" class="hover:c-#d7231e" target="_blank">
+                    {{ scopes.row.goods_name }}
+                </NuxtLink>
+            </template>
+            <template #type="{ scopes }">
+                我的{{ scopes.row.type === 1 ? '提问' : '回答' }}
+            </template>
+            <template #add_time="{ scopes }">
+                {{ formatTime(scopes.row.add_time) }}
+            </template>
+            <template #operate="{ scopes }">
+                <el-button type="primary" link size="small" @click="onDelete(scopes.row)">
+                    删除
+                </el-button>
+            </template>
+        </CoTable>
+        <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="defData.title"
+            :draggable="defData.replyData.length > 10 ? false : true" width="680px" @close="onClose" @cancel="onClose"
+            @confirm="onConfirm">
+            <ul class="pr10px">
+                <li v-for="item in defData.replyData" :key="item.question_id"
+                    class="flex b-b-1px b-b-#eee b-b-dashed py5px">
+                    <b class="w25px c-green">答:</b>
+                    <div class="flex-1">
+                        {{ item.content }}
+                    </div>
+                    <div class="w170px text-right">
+                        <span class="text-12px font-100"> {{ changeToStar(item.user_name) }}
+                            {{ formatTime(item.add_time) }}</span>
+                    </div>
+                </li>
+            </ul>
+        </CoDialog>
+    </div>
+</template>
 
 <style lang="scss" scoped></style>

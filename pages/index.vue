@@ -1,3 +1,9 @@
+<script setup lang="ts">
+definePageMeta({
+    layout: 'home',
+})
+</script>
+
 <template>
     <div class="index-box">
         <Suspense>
@@ -13,12 +19,6 @@
         </Suspense>
     </div>
 </template>
-
-<script setup lang="ts">
-definePageMeta({
-    layout: 'home',
-})
-</script>
 
 <style  lang="scss" scoped>
 .index-box {

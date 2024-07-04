@@ -218,7 +218,7 @@ export function useCustomFetch<T>(url: string, options: UseFetchOptions<T> = {})
  * @returns
  */
 export function useTestFetch(url: string, data?: any) {
-    if (!process.dev) {
+    if (!import.meta.dev) {
         throw new Error('useTestFetch 只能测试使用')
     }
     return useFetch('/api/test', {

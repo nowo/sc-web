@@ -1,28 +1,3 @@
-<template>
-    <div ref="tablePageRef" class="co-table">
-        <div class="co-table-content">
-            <client-only>
-                <ElTable ref="tableRef" v-bind="$attrs" :data="props.data" :max-height="tableHeight">
-                    <ElTableColumn v-for="(item, index) in headerList" :key="index" show-overflow-tooltip v-bind="item">
-                        <template v-if="item.slotHeader" #header="scope">
-                            <slot :name="`${item.property}Header`" :scopes="scope" />
-                        </template>
-                        <!-- 这里根据slot字段来判断是否使用插槽 -->
-                        <template v-if="item.type !== 'selection' && item.type !== 'index'" #default="scope">
-                            <slot v-if="item.slot" :name="item.property" :scopes="scope" />
-                            <span v-else>{{ scope.row[item.property] }}</span>
-                        </template>
-                    </ElTableColumn>
-                </ElTable>
-            </client-only>
-        </div>
-        <ElPagination v-if="defData.pagination.total" ref="pageRef" v-model:current-page="defData.pagination.page"
-            v-model:page-size="defData.pagination.page_size" small :page-sizes="defData.pagination.page_sizes"
-            :total="defData.pagination.total" :pager-count="5" background layout="total, sizes, prev, pager, next, jumper"
-            class="mt15px" @size-change="onHandleSizeChange" @current-change="onHandleCurrentChange" />
-    </div>
-</template>
-
 <script lang="ts" setup>
 import type { TableInstance } from 'element-plus'
 import { ElPagination, ElTableColumn } from 'element-plus'
@@ -153,6 +128,31 @@ defineExpose({
     tableRef,
 })
 </script>
+
+<template>
+    <div ref="tablePageRef" class="co-table">
+        <div class="co-table-content">
+            <client-only>
+                <ElTable ref="tableRef" v-bind="$attrs" :data="props.data" :max-height="tableHeight">
+                    <ElTableColumn v-for="(item, index) in headerList" :key="index" show-overflow-tooltip v-bind="item">
+                        <template v-if="item.slotHeader" #header="scope">
+                            <slot :name="`${item.property}Header`" :scopes="scope" />
+                        </template>
+                        <!-- 这里根据slot字段来判断是否使用插槽 -->
+                        <template v-if="item.type !== 'selection' && item.type !== 'index'" #default="scope">
+                            <slot v-if="item.slot" :name="item.property" :scopes="scope" />
+                            <span v-else>{{ scope.row[item.property] }}</span>
+                        </template>
+                    </ElTableColumn>
+                </ElTable>
+            </client-only>
+        </div>
+        <ElPagination v-if="defData.pagination.total" ref="pageRef" v-model:current-page="defData.pagination.page"
+            v-model:page-size="defData.pagination.page_size" small :page-sizes="defData.pagination.page_sizes"
+            :total="defData.pagination.total" :pager-count="5" background layout="total, sizes, prev, pager, next, jumper"
+            class="mt15px" @size-change="onHandleSizeChange" @current-change="onHandleCurrentChange" />
+    </div>
+</template>
 
 <style lang="scss">
 .co-table {

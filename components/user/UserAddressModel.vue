@@ -1,55 +1,4 @@
 <!-- 新增、修改地址 -->
-<template>
-    <!-- auto-height -->
-    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
-        width="680px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
-        <el-form ref="formRef" :model="form.data" :label-width="130" :rules="rules">
-            <el-row>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="name" label="联系人：">
-                        <el-input v-model="form.data.name" placeholder="请输入联系人名称" maxlength="20" clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                    <el-form-item prop="phone" label="联系电话：">
-                        <el-input v-model="form.data.phone" placeholder="请输入联系电话" maxlength="20" clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="email" label="电子邮箱：">
-                        <el-input v-model="form.data.email" type="email" placeholder="请输入电子邮箱" maxlength="20" clearable />
-                    </el-form-item>
-                </el-col>
-
-                <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                    <el-form-item label="省市区：" prop="provinceArr">
-                        <el-cascader v-model="form.data.provinceArr" :options="defData.addressList"
-                            :props="{ value: 'cityName', label: 'cityName' }" class="w100%" clearable filterable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                    <el-form-item prop="address" label="详细地址：">
-                        <el-input v-model="form.data.address" type="textarea" resize="none" :rows="3" maxlength="50"
-                            clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="defaultArr" label="是否默认：">
-                        <el-checkbox-group v-model="form.data.defaultArr">
-                            <el-checkbox :label="1">
-                                设为默认收货地址
-                            </el-checkbox>
-                            <el-checkbox :label="2">
-                                设为默认发票地址
-                            </el-checkbox>
-                        </el-checkbox-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        </el-form>
-    </CoDialog>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 import { CommonApi } from '~/api/common'
@@ -88,7 +37,7 @@ const rules = reactive<FormRules>({
     ],
     phone: [
         { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
         // { required: true, pattern: /^(((\d{3,4}-)?[0-9]{7,8})|(1(3|4|5|6|7|8|9)\d{9}))$/, message: '填写正确的手机号格式', trigger: 'blur' },
     ],
     provinceArr: [
@@ -231,5 +180,56 @@ defineExpose({
     onOpenDialog,
 })
 </script>
+
+<template>
+    <!-- auto-height -->
+    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
+        width="680px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
+        <el-form ref="formRef" :model="form.data" :label-width="130" :rules="rules">
+            <el-row>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="name" label="联系人：">
+                        <el-input v-model="form.data.name" placeholder="请输入联系人名称" maxlength="20" clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                    <el-form-item prop="phone" label="联系电话：">
+                        <el-input v-model="form.data.phone" placeholder="请输入联系电话" maxlength="20" clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="email" label="电子邮箱：">
+                        <el-input v-model="form.data.email" type="email" placeholder="请输入电子邮箱" maxlength="20" clearable />
+                    </el-form-item>
+                </el-col>
+
+                <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                    <el-form-item label="省市区：" prop="provinceArr">
+                        <el-cascader v-model="form.data.provinceArr" :options="defData.addressList"
+                            :props="{ value: 'cityName', label: 'cityName' }" class="w100%" clearable filterable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                    <el-form-item prop="address" label="详细地址：">
+                        <el-input v-model="form.data.address" type="textarea" resize="none" :rows="3" maxlength="50"
+                            clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="defaultArr" label="是否默认：">
+                        <el-checkbox-group v-model="form.data.defaultArr">
+                            <el-checkbox :label="1">
+                                设为默认收货地址
+                            </el-checkbox>
+                            <el-checkbox :label="2">
+                                设为默认发票地址
+                            </el-checkbox>
+                        </el-checkbox-group>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+    </CoDialog>
+</template>
 
 <style lang="scss" scoped></style>

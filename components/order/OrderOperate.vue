@@ -1,50 +1,3 @@
-<template>
-    <div class="order-operate">
-        <div v-if="isApply" class="item-ope">
-            <el-button type="" :link="props.link" :size="props.size" class="mb3px" @click="onInvoice()">
-                申请发票
-            </el-button>
-            <Teleport to="body">
-                <OrderInvoiceModel ref="invoiceRef" @update="setUpdateList()" />
-            </Teleport>
-        </div>
-        <div v-if="orderStatus === 1" class="item-ope">
-            <el-button type="warning" :link="props.link" :size="props.size" class="mb3px" @click="onPayOrder()">
-                去付款
-            </el-button>
-        </div>
-        <div v-if="orderStatus === 1 || orderStatus === 2 || orderStatus === 4" class="item-ope">
-            <el-button type="info" :link="props.link" :size="props.size" @click="onCancel()">
-                取消订单
-            </el-button>
-        </div>
-        <template v-if="orderStatus === 3">
-            <div class="item-ope">
-                <el-button type="success" :link="props.link" :size="props.size" class="mb3px" @click="onConfirm()">
-                    确认收货
-                </el-button>
-            </div>
-        </template>
-        <div v-if="(orderStatus === 3 || orderStatus === 6) && !props.data.is_return" class="item-ope">
-            <el-button type="primary" :link="props.link" :size="props.size" @click="onReturn()">
-                退换申请
-            </el-button>
-            <Teleport to="body">
-                <OrderReturnModel ref="modelRef" @update="setUpdateList()" />
-            </Teleport>
-        </div>
-
-        <div v-if="orderStatus === 6 || orderStatus === 7" class="item-ope">
-            <!-- <el-button type="primary" :link="props.link" :size="props.size" @click="onOrderBuy()">
-                再次购买
-            </el-button> -->
-            <el-button type="info" :link="props.link" :size="props.size" @click="onDel()">
-                删除订单
-            </el-button>
-        </div>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import { OrderApi } from '~/api/goods/order'
 import { OrderInvoiceModel, OrderReturnModel } from '#components'
@@ -195,5 +148,52 @@ const onInvoice = () => {
     invoiceRef.value?.onOpenDialog({ order_no: props.data.order_no }, 1)
 }
 </script>
+
+<template>
+    <div class="order-operate">
+        <div v-if="isApply" class="item-ope">
+            <el-button type="" :link="props.link" :size="props.size" class="mb3px" @click="onInvoice()">
+                申请发票
+            </el-button>
+            <Teleport to="body">
+                <OrderInvoiceModel ref="invoiceRef" @update="setUpdateList()" />
+            </Teleport>
+        </div>
+        <div v-if="orderStatus === 1" class="item-ope">
+            <el-button type="warning" :link="props.link" :size="props.size" class="mb3px" @click="onPayOrder()">
+                去付款
+            </el-button>
+        </div>
+        <div v-if="orderStatus === 1 || orderStatus === 2 || orderStatus === 4" class="item-ope">
+            <el-button type="info" :link="props.link" :size="props.size" @click="onCancel()">
+                取消订单
+            </el-button>
+        </div>
+        <template v-if="orderStatus === 3">
+            <div class="item-ope">
+                <el-button type="success" :link="props.link" :size="props.size" class="mb3px" @click="onConfirm()">
+                    确认收货
+                </el-button>
+            </div>
+        </template>
+        <div v-if="(orderStatus === 3 || orderStatus === 6) && !props.data.is_return" class="item-ope">
+            <el-button type="primary" :link="props.link" :size="props.size" @click="onReturn()">
+                退换申请
+            </el-button>
+            <Teleport to="body">
+                <OrderReturnModel ref="modelRef" @update="setUpdateList()" />
+            </Teleport>
+        </div>
+
+        <div v-if="orderStatus === 6 || orderStatus === 7" class="item-ope">
+            <!-- <el-button type="primary" :link="props.link" :size="props.size" @click="onOrderBuy()">
+                再次购买
+            </el-button> -->
+            <el-button type="info" :link="props.link" :size="props.size" @click="onDel()">
+                删除订单
+            </el-button>
+        </div>
+    </div>
+</template>
 
 <style lang="scss" scoped></style>

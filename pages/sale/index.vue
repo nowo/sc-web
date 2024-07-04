@@ -1,9 +1,3 @@
-<template>
-    <div>
-    <!-- 售后申请 -->
-    </div>
-</template>
-
 <script setup lang="ts">
 definePageMeta({
     layout: 'home',
@@ -13,6 +7,12 @@ definePageMeta({
     },
 })
 </script>
+
+<template>
+    <div>
+    <!-- 售后申请 -->
+    </div>
+</template>
 
 <style  lang="scss" scoped>
 

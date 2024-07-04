@@ -91,7 +91,7 @@ export const PAGINATION = {
 }
 
 // 是否为客户端 true|false
-export const CLIENT = process.client
+export const CLIENT = import.meta.client
 
 export const INVOICE_DATA = {
     1: '增值税发票',

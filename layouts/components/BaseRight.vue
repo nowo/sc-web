@@ -1,3 +1,16 @@
+<script lang="ts" setup>
+const useCartNumber = useCartNumberState()
+
+// 购物车商品数量
+const number = await useCartNumber.setCartNumber()
+// const el = ref<HTMLElement | null>(null)
+// const rt = useScroll(el, { behavior: 'smooth' })
+
+// const goBackTop = () => {
+//   console.log('y :>> ', rt)
+// }
+</script>
+
 <template>
     <div class="fixed-box">
         <ul class="side-ul">
@@ -53,19 +66,6 @@
         </ul>
     </div>
 </template>
-
-<script lang="ts" setup>
-const useCartNumber = useCartNumberState()
-
-// 购物车商品数量
-const number = await useCartNumber.setCartNumber()
-// const el = ref<HTMLElement | null>(null)
-// const rt = useScroll(el, { behavior: 'smooth' })
-
-// const goBackTop = () => {
-//   console.log('y :>> ', rt)
-// }
-</script>
 
 <style lang="scss" scoped>
 .fixed-box {

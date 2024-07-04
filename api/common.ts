@@ -1,5 +1,5 @@
 export const CommonApi = {
-    getList: (data: RequestDataType<{ page: number; pageSize: string }>) => useHttp<{ data: { total: number } }>('/api/mall/get_wechat_url', data, { method: 'post' }),
+    getList: (data: RequestDataType<{ page: number, pageSize: string }>) => useHttp<{ data: { total: number } }>('/api/mall/get_wechat_url', data, { method: 'post' }),
 
     /**
      * 上传图片

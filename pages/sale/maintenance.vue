@@ -1,106 +1,3 @@
-<template>
-    <LayoutSaleAfter>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div><el-skeleton /></div>
-                <div class="min-h300px">
-                    <el-skeleton />
-                </div>
-            </template>
-            <el-breadcrumb>
-                <el-breadcrumb-item>
-                    售后申请
-                </el-breadcrumb-item>
-                <el-breadcrumb-item>维修申请</el-breadcrumb-item>
-            </el-breadcrumb>
-            <el-form ref="formRef" class="px5px" :model="form.data" :rules="rules" label-width="110px">
-                <el-row :gutter="10">
-                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11" class="mt20px">
-                        <el-form-item label="联系人" prop="contacts">
-                            <el-input v-model="form.data.contacts" class="w100%" placeholder="请输入联系人" maxlength="20"
-                                clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
-                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                        <el-form-item label="省市区" prop="provinceArr">
-                            <el-cascader v-model="form.data.provinceArr" :options="defData.addressList"
-                                :props="{ value: 'cityName', label: 'cityName' }" class="w100%" clearable filterable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                        <el-form-item label="详细地址" prop="address">
-                            <el-input v-model="form.data.address" type="textarea" maxlength="200" clearable
-                                show-word-limit />
-                        </el-form-item>
-                    </el-col>
-                    <!-- <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20"> -->
-                    <el-form-item label="商品关键字" prop="goods_id">
-                        <el-select v-model="form.data.goods_id" placeholder="请输入商品关键字" style="width: 500px"
-                            :remote-method="remoteMethod" :loading="defData.loading" filterable clearable remote
-                            reserve-keyword>
-                            <el-option v-for="item in defData.goodsList" :key="item.goods_id" :label="item.goods_name"
-                                :value="item.goods_id" />
-                        </el-select>
-                    </el-form-item>
-                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                        <el-form-item label="需求详细描述" prop="describe">
-                            <el-input v-model="form.data.describe" type="textarea" show-word-limit maxlength="200"
-                                clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                        <el-form-item prop="des_img" label="上传图片">
-                            <CoUpload v-model="form.data.des_img" chat="||" multiple :limit="10" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                        <el-form-item label="上传视频" prop="des_video">
-                            <CoUpload v-model="form.data.des_vivo" type="text" accept="video/*" />
-                        </el-form-item>
-                    </el-col>
-
-                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11">
-                        <el-form-item label="手机号码" prop="phone">
-                            <el-input v-model="form.data.phone" class="w100%" placeholder="请输入手机号码" maxlength="255"
-                                clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
-                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11">
-                        <el-form-item label="验证码" prop="validate_code">
-                            <el-col :span="15">
-                                <el-input v-model.trim="form.data.validate_code" type="text" placeholder="请输入短信验证码"
-                                    clearable tabindex="3" />
-                            </el-col>
-                            <el-col :span="1" />
-                            <el-col :span="8">
-                                <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
-                                    获取验证码
-                                </el-button>
-                                <el-button v-else class="w100%">
-                                    {{ defData.time }}秒
-                                </el-button>
-                            </el-col>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
-                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                        <el-form-item label="预约上门时间" prop="ask_date">
-                            <el-date-picker v-model="form.data.ask_date" type="datetime" value-format="YYYY-MM-DD HH:mm" />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
-                        <el-button type="primary" class="ml350px min-w150px" size="large" @click="onSubmit">
-                            <b>提交维修申请</b>
-                        </el-button>
-                    </el-col>
-                </el-row>
-            </el-form>
-        </el-skeleton>
-    </LayoutSaleAfter>
-</template>
-
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
 import { CommonApi } from '~/api/common'
@@ -113,7 +10,7 @@ const rules = reactive<FormRules>({
     goods_id: [{ required: true, message: '必填项不能为空', trigger: 'blur' }],
     phone: [
         { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
     ],
     provinceArr: [{ required: true, type: 'array', message: '必填项不能为空', trigger: 'blur' }],
     address: [{ required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' }],
@@ -253,5 +150,108 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutSaleAfter>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div><el-skeleton /></div>
+                <div class="min-h300px">
+                    <el-skeleton />
+                </div>
+            </template>
+            <el-breadcrumb>
+                <el-breadcrumb-item>
+                    售后申请
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>维修申请</el-breadcrumb-item>
+            </el-breadcrumb>
+            <el-form ref="formRef" class="px5px" :model="form.data" :rules="rules" label-width="110px">
+                <el-row :gutter="10">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11" class="mt20px">
+                        <el-form-item label="联系人" prop="contacts">
+                            <el-input v-model="form.data.contacts" class="w100%" placeholder="请输入联系人" maxlength="20"
+                                clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-form-item label="省市区" prop="provinceArr">
+                            <el-cascader v-model="form.data.provinceArr" :options="defData.addressList"
+                                :props="{ value: 'cityName', label: 'cityName' }" class="w100%" clearable filterable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-form-item label="详细地址" prop="address">
+                            <el-input v-model="form.data.address" type="textarea" maxlength="200" clearable
+                                show-word-limit />
+                        </el-form-item>
+                    </el-col>
+                    <!-- <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20"> -->
+                    <el-form-item label="商品关键字" prop="goods_id">
+                        <el-select v-model="form.data.goods_id" placeholder="请输入商品关键字" style="width: 500px"
+                            :remote-method="remoteMethod" :loading="defData.loading" filterable clearable remote
+                            reserve-keyword>
+                            <el-option v-for="item in defData.goodsList" :key="item.goods_id" :label="item.goods_name"
+                                :value="item.goods_id" />
+                        </el-select>
+                    </el-form-item>
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-form-item label="需求详细描述" prop="describe">
+                            <el-input v-model="form.data.describe" type="textarea" show-word-limit maxlength="200"
+                                clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                        <el-form-item prop="des_img" label="上传图片">
+                            <CoUpload v-model="form.data.des_img" chat="||" multiple :limit="10" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                        <el-form-item label="上传视频" prop="des_video">
+                            <CoUpload v-model="form.data.des_vivo" type="text" accept="video/*" />
+                        </el-form-item>
+                    </el-col>
+
+                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11">
+                        <el-form-item label="手机号码" prop="phone">
+                            <el-input v-model="form.data.phone" class="w100%" placeholder="请输入手机号码" maxlength="255"
+                                clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
+                    <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11">
+                        <el-form-item label="验证码" prop="validate_code">
+                            <el-col :span="15">
+                                <el-input v-model.trim="form.data.validate_code" type="text" placeholder="请输入短信验证码"
+                                    clearable tabindex="3" />
+                            </el-col>
+                            <el-col :span="1" />
+                            <el-col :span="8">
+                                <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
+                                    获取验证码
+                                </el-button>
+                                <el-button v-else class="w100%">
+                                    {{ defData.time }}秒
+                                </el-button>
+                            </el-col>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-form-item label="预约上门时间" prop="ask_date">
+                            <el-date-picker v-model="form.data.ask_date" type="datetime" value-format="YYYY-MM-DD HH:mm" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-button type="primary" class="ml350px min-w150px" size="large" @click="onSubmit">
+                            <b>提交维修申请</b>
+                        </el-button>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </el-skeleton>
+    </LayoutSaleAfter>
+</template>
 
 <style scoped></style>

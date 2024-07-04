@@ -16,7 +16,7 @@ export default {
             footerPrefixesSelect: '选择关联issue前缀（可选）:',
             customFooterPrefix: '输入自定义issue前缀 :',
             footer: '列举关联issue (可选) 例如: #31, #I3244 :\n',
-            confirmCommit: '是否提交或修改commit ?'
+            confirmCommit: '是否提交或修改commit ?',
         },
         types: [
             { value: 'feat', name: 'feat:     新增功能 | A new feature' },
@@ -52,11 +52,11 @@ export default {
             ['release', '版本相关'],
             ['other', '其他修改'],
             // 如果选择 custom，后面会让你再输入一个自定义的 scope。也可以不设置此项，把后面的 allowCustomScopes 设置为 true
-            ['custom', '以上都不是？我要自定义']
+            ['custom', '以上都不是？我要自定义'],
         ].map(([value, description]) => {
             return {
                 value,
-                name: `${value.padEnd(30)} (${description})`
+                name: `${value.padEnd(30)} (${description})`,
             }
         }),
         allowCustomScopes: true,
@@ -73,7 +73,7 @@ export default {
         issuePrefixes: [
             // 如果使用 gitee 作为开发管理
             { value: 'link', name: 'link:     链接 ISSUES 进行中' },
-            { value: 'closed', name: 'closed:   标记 ISSUES 已完成' }
+            { value: 'closed', name: 'closed:   标记 ISSUES 已完成' },
         ],
         customIssuePrefixAlign: 'top',
         emptyIssuePrefixAlias: 'skip',
@@ -88,6 +88,6 @@ export default {
         defaultBody: '',
         defaultIssues: '',
         defaultScope: '',
-        defaultSubject: ''
-    }
+        defaultSubject: '',
+    },
 }

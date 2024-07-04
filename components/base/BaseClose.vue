@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { systemStatus } = useSystemState() // 商城状态
+</script>
+
 <template>
     <div class="min-h100vh bg-white">
         <div class="ma max-w100% w600px pt200px">
@@ -9,7 +13,3 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-const { systemStatus } = useSystemState() // 商城状态
-</script>

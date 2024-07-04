@@ -1,18 +1,4 @@
 <!-- 帮助中心 -->
-<template>
-    <div>
-        <BaseError v-if="defData.error" />
-        <LayoutContent v-else :type="1">
-            <div class="text-box">
-                <div class="text-tle min-h20px">
-                    {{ textInfo?.name }}
-                </div>
-                <div class="text-content" v-html="textInfo?.content" />
-            </div>
-        </LayoutContent>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import { ContentApi } from '~/api/home/content'
 
@@ -36,7 +22,7 @@ const initDefaultData = async () => {
 }
 
 watch(() => id.value, () => {
-    if (process.client) document.documentElement.scrollTop = 0
+    if (import.meta.client) document.documentElement.scrollTop = 0
     initDefaultData()
 }, { immediate: true })
 
@@ -49,6 +35,20 @@ definePageMeta({
     // },
 })
 </script>
+
+<template>
+    <div>
+        <BaseError v-if="defData.error" />
+        <LayoutContent v-else :type="1">
+            <div class="text-box">
+                <div class="text-tle min-h20px">
+                    {{ textInfo?.name }}
+                </div>
+                <div class="text-content" v-html="textInfo?.content" />
+            </div>
+        </LayoutContent>
+    </div>
+</template>
 
 <style lang="scss" scoped>
 .text-box {

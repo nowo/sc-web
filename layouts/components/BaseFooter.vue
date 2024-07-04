@@ -1,3 +1,19 @@
+<script lang="ts" setup>
+// 获取系统信息
+const useSystem = useSystemState()
+const systemInfo = await useSystem.getSystemInfo()
+
+// 获取底部导航
+const { data: footer } = await useFetch<{ data: HomeApi_GetArticleResponse[] } & ResponseCodeMsg>('/api/main/nav', {
+    method: 'post',
+    body: {
+        type: 1,
+    },
+})
+
+const navList = computed<HomeApi_GetArticleResponse[]>(() => footer.value?.data || [])
+</script>
+
 <template>
     <div class="footer-box bg-#333">
         <div class="container">
@@ -67,22 +83,6 @@
         </div>
     </div>
 </template>
-
-<script lang="ts" setup>
-// 获取系统信息
-const useSystem = useSystemState()
-const systemInfo = await useSystem.getSystemInfo()
-
-// 获取底部导航
-const { data: footer } = await useFetch<{ data: HomeApi_GetArticleResponse[] } & ResponseCodeMsg>('/api/main/nav', {
-    method: 'post',
-    body: {
-        type: 1,
-    },
-})
-
-const navList = computed<HomeApi_GetArticleResponse[]>(() => footer.value?.data || [])
-</script>
 
 <style lang="scss" scoped>
 .footer-box {

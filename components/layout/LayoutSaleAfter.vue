@@ -1,3 +1,7 @@
+<script lang="ts" setup>
+
+</script>
+
 <template>
     <div class="layout-user">
         <div class="container">
@@ -38,10 +42,6 @@
         </div>
     </div>
 </template>
-
-<script lang="ts" setup>
-
-</script>
 
 <style lang="scss" scoped>
 .router-link-active {

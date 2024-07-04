@@ -1,4 +1,12 @@
 <!-- 导航菜单 -->
+<script lang="ts" setup>
+import { HomeApi } from '~/api/home/home'
+
+// 获取导航
+const { data: menu } = await HomeApi.getNav()
+// console.log('menu :>> ', menu)
+</script>
+
 <template>
     <nav class="nav-box min-h48px">
         <ClientOnly>
@@ -11,14 +19,6 @@
         </NuxtLink> -->
     </nav>
 </template>
-
-<script lang="ts" setup>
-import { HomeApi } from '~/api/home/home'
-
-// 获取导航
-const { data: menu } = await HomeApi.getNav()
-// console.log('menu :>> ', menu)
-</script>
 
 <style lang="scss" scoped>
 .nav-box {

@@ -1,47 +1,3 @@
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="pb20px">
-                    <el-skeleton-item class="w20%!" />
-                </div>
-                <div class="min-h500px">
-                    <el-skeleton :rows="5" />
-                </div>
-            </template>
-
-            <el-breadcrumb class="mb20px">
-                <el-breadcrumb-item>
-                    我关注的
-                </el-breadcrumb-item>
-                <el-breadcrumb-item>浏览历史</el-breadcrumb-item>
-            </el-breadcrumb>
-
-            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
-                auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
-                <template #goods_name="{ scopes }">
-                    <div class="flex items-center">
-                        <co-image class="h50px w50px" :src="scopes.row.goods_img" :icon-size="24" />
-                        <div class="pl10px">
-                            <NuxtLink :to="`/goods/${scopes.row.goods_sn}`" class="hover:c-#d7231e" target="_blank">
-                                {{ scopes.row.goods_name }}
-                            </NuxtLink>
-                        </div>
-                    </div>
-                </template>
-                <template #recent_time="{ scopes }">
-                    {{ formatTime(scopes.row.recent_time) }}
-                </template>
-                <template #operate="{ scopes }">
-                    <el-button type="primary" link size="small" @click="onRemove(scopes.row)">
-                        删除
-                    </el-button>
-                </template>
-            </CoTable>
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import { RecordApi } from '~/api/user/record'
 
@@ -120,5 +76,49 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="pb20px">
+                    <el-skeleton-item class="w20%!" />
+                </div>
+                <div class="min-h500px">
+                    <el-skeleton :rows="5" />
+                </div>
+            </template>
+
+            <el-breadcrumb class="mb20px">
+                <el-breadcrumb-item>
+                    我关注的
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>浏览历史</el-breadcrumb-item>
+            </el-breadcrumb>
+
+            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
+                auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
+                <template #goods_name="{ scopes }">
+                    <div class="flex items-center">
+                        <co-image class="h50px w50px" :src="scopes.row.goods_img" :icon-size="24" />
+                        <div class="pl10px">
+                            <NuxtLink :to="`/goods/${scopes.row.goods_sn}`" class="hover:c-#d7231e" target="_blank">
+                                {{ scopes.row.goods_name }}
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </template>
+                <template #recent_time="{ scopes }">
+                    {{ formatTime(scopes.row.recent_time) }}
+                </template>
+                <template #operate="{ scopes }">
+                    <el-button type="primary" link size="small" @click="onRemove(scopes.row)">
+                        删除
+                    </el-button>
+                </template>
+            </CoTable>
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style lang="scss" scoped></style>

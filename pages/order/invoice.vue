@@ -1,56 +1,4 @@
 <!-- 订单发票列表 -->
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="min-h500px">
-                    <el-skeleton class="mb20px" />
-                    <el-skeleton :rows="5" />
-                </div>
-            </template>
-            <el-breadcrumb class="mb15px">
-                <el-breadcrumb-item>
-                    订单中心
-                </el-breadcrumb-item>
-                <el-breadcrumb-item>订单发票列表</el-breadcrumb-item>
-            </el-breadcrumb>
-
-            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" class="table-box"
-                :data="tableData.data" auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
-                <template #add_time="{ scopes }">
-                    {{ formatTime(scopes.row.add_time) }}
-                </template>
-                <template #type="{ scopes }">
-                    <el-tag :type="scopes.row.type === 1 ? 'danger' : scopes.row.type === 2 ? 'success' : 'warning'">
-                        {{ INVOICE_DATA[scopes.row.type as '1'] }}
-                    </el-tag>
-                </template>
-                <template #verify_status="{ scopes }">
-                    <div class="text-13px">
-                        {{ defData.operateList[scopes.row.verify_status as '1'] }}
-                    </div>
-                </template>
-                <!-- <template #failed_remark="{ scopes }">
-                    <div class="text-13px">
-                        {{ scopes.row.verify_status !== 5 ? scopes.row.failed_remark : '' }}
-                    </div>
-                </template> -->
-
-                <template #operate="{ scopes }">
-                    <el-button v-if="scopes.row.verify_status === 0 || scopes.row.verify_status === 2" type="primary"
-                        size="small" link @click="onDetail(scopes.row, 2)">
-                        修改
-                    </el-button>
-                    <el-button v-else size="small" link @click="onDetail(scopes.row, 3)">
-                        查看
-                    </el-button>
-                </template>
-            </CoTable>
-            <OrderInvoiceModel ref="modelRef" @update="updateTableData" />
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import { OrderInvoiceModel } from '#components'
 import { OrderInvoiceApi } from '~/api/goods/order'
@@ -137,6 +85,58 @@ const updateTableData = () => {
 // })
 initTableData()
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="min-h500px">
+                    <el-skeleton class="mb20px" />
+                    <el-skeleton :rows="5" />
+                </div>
+            </template>
+            <el-breadcrumb class="mb15px">
+                <el-breadcrumb-item>
+                    订单中心
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>订单发票列表</el-breadcrumb-item>
+            </el-breadcrumb>
+
+            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" class="table-box"
+                :data="tableData.data" auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
+                <template #add_time="{ scopes }">
+                    {{ formatTime(scopes.row.add_time) }}
+                </template>
+                <template #type="{ scopes }">
+                    <el-tag :type="scopes.row.type === 1 ? 'danger' : scopes.row.type === 2 ? 'success' : 'warning'">
+                        {{ INVOICE_DATA[scopes.row.type as '1'] }}
+                    </el-tag>
+                </template>
+                <template #verify_status="{ scopes }">
+                    <div class="text-13px">
+                        {{ defData.operateList[scopes.row.verify_status as '1'] }}
+                    </div>
+                </template>
+                <!-- <template #failed_remark="{ scopes }">
+                    <div class="text-13px">
+                        {{ scopes.row.verify_status !== 5 ? scopes.row.failed_remark : '' }}
+                    </div>
+                </template> -->
+
+                <template #operate="{ scopes }">
+                    <el-button v-if="scopes.row.verify_status === 0 || scopes.row.verify_status === 2" type="primary"
+                        size="small" link @click="onDetail(scopes.row, 2)">
+                        修改
+                    </el-button>
+                    <el-button v-else size="small" link @click="onDetail(scopes.row, 3)">
+                        查看
+                    </el-button>
+                </template>
+            </CoTable>
+            <OrderInvoiceModel ref="modelRef" @update="updateTableData" />
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style  lang="scss" scoped>
 .table-box {

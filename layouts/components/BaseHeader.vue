@@ -1,85 +1,3 @@
-<template>
-    <section class="header-box">
-        <el-form class="overflow-hidden py25px" size="large" @submit.prevent="onSearch('')">
-            <div class="flex items-center justify-between text-#f8f8f8 container">
-                <div class="logo min-w150px">
-                    <NuxtLink to="/">
-                        <img class="h50px" :src="systemInfo?.shop_logo" height="50" alt="logo">
-                    </NuxtLink>
-                </div>
-                <div class="search-box relative w50%">
-                    <client-only>
-                        <ElAutocomplete ref="autocompleteRef" v-model="search.keyword"
-                            :fetch-suggestions="querySearchAsync" popper-class="pop-search" class="w100%"
-                            :debounce="800" fit-input-width placeholder="" select-when-unmatched label="test"
-                            @select="onSearch">
-                            <template #prefix>
-                                <i class="i-ep-search" />
-                            </template>
-                            <!-- <template #prepend>
-                            <lazy-el-select v-model="search.select" placeholder="" style="width: 115px">
-                                <el-option label="全部商品" value="1" />
-                                <el-option label="精选商品" value="2" />
-                                <el-option label="特价商品" value="3" />
-                            </lazy-el-select>
-                        </template> -->
-                            <template #append>
-                                <el-button type="primary" class="btn-search min-w120px" @click="onSearch('')">
-                                    搜 索
-                                </el-button>
-                            </template>
-                            <template #default="{ item }">
-                                <div class="pop-item flex justify-between">
-                                    <div class="pop-text text-13px" v-html="setHighlightText(item.value)" />
-                                    <el-button v-if="item.history" size="small" link
-                                        @click.stop="onRemoveHistory(item.value)">
-                                        <span class="v1">搜索历史</span>
-                                        <span class="pop-remove">删除</span>
-                                    </el-button>
-                                </div>
-                            </template>
-                        </ElAutocomplete>
-                        <Teleport v-if="showTeleport" to=".pop-search">
-                            <div v-if="showClear" class="pop-clear i-ep-delete" @click.stop="onRemoveHistoryAll" />
-                        </Teleport>
-                        <template #fallback>
-                            <div class="flex items-center justify-between b-rounded-4px bg-#fff pl15px">
-                                <i class="i-ep-search text-14px c-#a8abb2" />
-                                <el-button type="primary" class="btn-search min-w120px">
-                                    搜 索
-                                </el-button>
-                            </div>
-                        </template>
-                    </client-only>
-
-                    <div v-if="searchHotList.length" class="search-hot">
-                        热门搜索：<span v-for="(item) in searchHotList" :key="item" @click="onSearchHot(item)">{{ item
-                            }}</span>
-                    </div>
-                </div>
-                <div class="cart">
-                    <!-- <NuxtLink to="/order/cart">
-                        <el-badge :value="number" class="cart-number">
-                            <el-button type="primary" class="min-w150px">
-                                <i class="i-ep-shopping-cart-full mr8px" />
-                                购物车
-                            </el-button>
-                        </el-badge>
-                    </NuxtLink> -->
-                    <NuxtLink to="/order/history">
-                        <el-button type="primary" class="min-w150px">
-                            <i class="i-ep-shopping-cart-full mr8px" />
-                            历史记录
-                        </el-button>
-                    </NuxtLink>
-                </div>
-            </div>
-        </el-form>
-
-        <HeaderIndex />
-    </section>
-</template>
-
 <script lang="ts" setup>
 import { ElAutocomplete } from 'element-plus'
 import HeaderIndex from './header/HeaderIndex.vue'
@@ -236,6 +154,88 @@ onMounted(async () => {
     showTeleport.value = true
 })
 </script>
+
+<template>
+    <section class="header-box">
+        <el-form class="overflow-hidden py25px" size="large" @submit.prevent="onSearch('')">
+            <div class="flex items-center justify-between text-#f8f8f8 container">
+                <div class="logo min-w150px">
+                    <NuxtLink to="/">
+                        <img class="h50px" :src="systemInfo?.shop_logo" height="50" alt="logo">
+                    </NuxtLink>
+                </div>
+                <div class="search-box relative w50%">
+                    <client-only>
+                        <ElAutocomplete ref="autocompleteRef" v-model="search.keyword"
+                            :fetch-suggestions="querySearchAsync" popper-class="pop-search" class="w100%"
+                            :debounce="800" fit-input-width placeholder="" select-when-unmatched label="test"
+                            @select="onSearch">
+                            <template #prefix>
+                                <i class="i-ep-search" />
+                            </template>
+                            <!-- <template #prepend>
+                            <lazy-el-select v-model="search.select" placeholder="" style="width: 115px">
+                                <el-option label="全部商品" value="1" />
+                                <el-option label="精选商品" value="2" />
+                                <el-option label="特价商品" value="3" />
+                            </lazy-el-select>
+                        </template> -->
+                            <template #append>
+                                <el-button type="primary" class="btn-search min-w120px" @click="onSearch('')">
+                                    搜 索
+                                </el-button>
+                            </template>
+                            <template #default="{ item }">
+                                <div class="pop-item flex justify-between">
+                                    <div class="pop-text text-13px" v-html="setHighlightText(item.value)" />
+                                    <el-button v-if="item.history" size="small" link
+                                        @click.stop="onRemoveHistory(item.value)">
+                                        <span class="v1">搜索历史</span>
+                                        <span class="pop-remove">删除</span>
+                                    </el-button>
+                                </div>
+                            </template>
+                        </ElAutocomplete>
+                        <Teleport v-if="showTeleport" to=".pop-search">
+                            <div v-if="showClear" class="pop-clear i-ep-delete" @click.stop="onRemoveHistoryAll" />
+                        </Teleport>
+                        <template #fallback>
+                            <div class="flex items-center justify-between b-rounded-4px bg-#fff pl15px">
+                                <i class="i-ep-search text-14px c-#a8abb2" />
+                                <el-button type="primary" class="btn-search min-w120px">
+                                    搜 索
+                                </el-button>
+                            </div>
+                        </template>
+                    </client-only>
+
+                    <div v-if="searchHotList.length" class="search-hot">
+                        热门搜索：<span v-for="(item) in searchHotList" :key="item" @click="onSearchHot(item)">{{ item
+                        }}</span>
+                    </div>
+                </div>
+                <div class="cart">
+                    <!-- <NuxtLink to="/order/cart">
+                        <el-badge :value="number" class="cart-number">
+                            <el-button type="primary" class="min-w150px">
+                                <i class="i-ep-shopping-cart-full mr8px" />
+                                购物车
+                            </el-button>
+                        </el-badge>
+                    </NuxtLink> -->
+                    <NuxtLink to="/order/history">
+                        <el-button type="primary" class="min-w150px">
+                            <i class="i-ep-shopping-cart-full mr8px" />
+                            历史记录
+                        </el-button>
+                    </NuxtLink>
+                </div>
+            </div>
+        </el-form>
+
+        <HeaderIndex />
+    </section>
+</template>
 
 <style lang="scss" scoped>
 .header-box {

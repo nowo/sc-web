@@ -1,10 +1,10 @@
-<template>
-    11
-</template>
-
 <script setup lang="ts">
 
 </script>
+
+<template>
+    <div>11</div>
+</template>
 
 <style scoped>
 .footer {

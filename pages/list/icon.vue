@@ -1,16 +1,3 @@
-<template>
-    <div class="container">
-        <div class="mt20px">
-            element-plus图标
-        </div>
-        <ul class="icon-ul">
-            <li v-for="(item, index) in iconLists" :key="index">
-                <div :class="item" />
-            </li>
-        </ul>
-    </div>
-</template>
-
 <script lang="ts" setup>
 const iconLists = [
     'i-ep-add-location',
@@ -313,6 +300,19 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <div class="container">
+        <div class="mt20px">
+            element-plus图标
+        </div>
+        <ul class="icon-ul">
+            <li v-for="(item, index) in iconLists" :key="index">
+                <div :class="item" />
+            </li>
+        </ul>
+    </div>
+</template>
 
 <style lang="scss" scoped>
 .icon-ul {

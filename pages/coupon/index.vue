@@ -1,15 +1,65 @@
+<script setup lang="ts">
+import { ElMessage } from 'element-plus'
+import { CouponApi } from '~/api/user/coupon'
+
+definePageMeta({
+    layout: 'home',
+})
+
+const userState = useUserState()
+
+const defData = reactive({
+    CurrentList: [] as CouponApi_allListResponse['current_list'], // 通用券
+    CategoryList: [] as CouponApi_allListResponse['category_list'], // 品类券
+    use_coupon: '',
+    token: '',
+    user_id: '' as number | '',
+})
+
+// 展示所有优惠券
+const showCoupon = async () => {
+    const { data: res, error } = await CouponApi.allList()
+    if (error.value) return ElMessage.error(error.value)
+    if (res.value?.code === 200) {
+        defData.CurrentList = res.value.data.current_list // 通用券列表
+        defData.CategoryList = res.value.data.category_list // 品类券列表
+        // defData.CurrentList.length = 4
+    } else {
+        return ElMessage.error(res.value?.msg)
+    }
+}
+showCoupon()
+
+// 领取
+const onReceive = async (row: any) => {
+    const user = await userState.getUserInfo()
+    if (user.value) {
+        defData.user_id = user.value.user_id
+    }
+
+    const data: CouponApi_addList = {
+        user_id: defData.user_id as number,
+        coupon_id: row,
+    }
+    const res = await CouponApi.addList(data)
+    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
+    ElMessage.success('领取成功')
+    showCoupon()
+}
+</script>
+
 <template>
     <div style="height: auto;background-color: #f00408;">
         <div style="background-image: url('/assets/images/coupon-bg.png');background-size: cover;background-repeat: no-repeat;
     background-position: center;height: 550px;width: 100%;">
-            <Transition name="slide">
-                <div class="side-item">
-                    <a href="#current">
-                        通用券
-                    </a>
-                    <a href="#category">品类券</a>
-                </div>
-            </Transition>
+            <!-- <Transition name="slide"> -->
+            <div class="side-item">
+                <a href="#current">
+                    通用券
+                </a>
+                <a href="#category">品类券</a>
+            </div>
+            <!-- </Transition> -->
         </div>
         <div class="container">
             <div>
@@ -75,56 +125,6 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-import { ElMessage } from 'element-plus'
-import { CouponApi } from '~/api/user/coupon'
-
-definePageMeta({
-    layout: 'home',
-})
-
-const userState = useUserState()
-
-const defData = reactive({
-    CurrentList: [] as CouponApi_allListResponse['current_list'], // 通用券
-    CategoryList: [] as CouponApi_allListResponse['category_list'], // 品类券
-    use_coupon: '',
-    token: '',
-    user_id: '' as number | '',
-})
-
-// 展示所有优惠券
-const showCoupon = async () => {
-    const { data: res, error } = await CouponApi.allList()
-    if (error.value) return ElMessage.error(error.value)
-    if (res.value?.code === 200) {
-        defData.CurrentList = res.value.data.current_list // 通用券列表
-        defData.CategoryList = res.value.data.category_list // 品类券列表
-        // defData.CurrentList.length = 4
-    } else {
-        return ElMessage.error(res.value?.msg)
-    }
-}
-showCoupon()
-
-// 领取
-const onReceive = async (row: any) => {
-    const user = await userState.getUserInfo()
-    if (user.value) {
-        defData.user_id = user.value.user_id
-    }
-
-    const data: CouponApi_addList = {
-        user_id: defData.user_id as number,
-        coupon_id: row,
-    }
-    const res = await CouponApi.addList(data)
-    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
-    ElMessage.success('领取成功')
-    showCoupon()
-}
-</script>
 
 <style lang="scss" scoped>
 .box-card {

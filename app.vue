@@ -1,13 +1,3 @@
-<template>
-    <el-config-provider :locale="locale" :message="messageConfig">
-        <VitePwaManifest />
-        <BaseClose v-if="systemStatus.is_close" />
-        <NuxtLayout v-else>
-            <NuxtPage />
-        </NuxtLayout>
-    </el-config-provider>
-</template>
-
 <script setup lang="ts">
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
@@ -37,6 +27,16 @@ useHead({
     ],
 })
 </script>
+
+<template>
+    <el-config-provider :locale="locale" :message="messageConfig">
+        <VitePwaManifest />
+        <BaseClose v-if="systemStatus.is_close" />
+        <NuxtLayout v-else>
+            <NuxtPage />
+        </NuxtLayout>
+    </el-config-provider>
+</template>
 
 <style lang="scss">
 html,

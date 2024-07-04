@@ -1,3 +1,60 @@
+<script setup lang="ts">
+import { CouponApi } from '~/api/user/coupon'
+
+const defData = reactive({
+    MyCouponList: [] as CouponApi_getListResponse['lists'],
+    CouponList: [] as CouponApi_allListResponse[],
+    use_coupon: '',
+    user_id: '' as number | '',
+    token: '',
+    skeleton: true,
+    is_status: 1,
+
+})
+
+// 初始化数据 我的优惠券
+const initCardData = async () => {
+    const data: CouponApi_getList = {
+        is_status: defData.is_status as 1 | 2 | 3 | 4,
+    }
+    const res = await CouponApi.geList(data)
+    await wait(10)
+    defData.skeleton = false
+    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
+    defData.MyCouponList = res.data.value.data.lists
+}
+initCardData()
+
+const onclick = () => {
+    initCardData()
+}
+
+// 删除
+const delClick = async (row: any) => {
+    ElMessageBox.confirm('此操作将永久删除该条内容，是否继续?', '提示', {
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        type: 'warning',
+        buttonSize: 'default',
+    }).then(async () => {
+        const res = await CouponApi.delList({
+            id: row,
+        })
+        if (res.data.value?.code !== 200) {
+            ElMessage.error(res.data.value?.msg)
+            return false
+        }
+        ElMessage.success('删除成功')
+        initCardData()
+    }).catch(() => { })
+}
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <LayoutUser>
         <el-skeleton :loading="defData.skeleton" animated>
@@ -84,63 +141,6 @@
         </el-skeleton>
     </LayoutUser>
 </template>
-
-<script setup lang="ts">
-import { CouponApi } from '~/api/user/coupon'
-
-const defData = reactive({
-    MyCouponList: [] as CouponApi_getListResponse['lists'],
-    CouponList: [] as CouponApi_allListResponse[],
-    use_coupon: '',
-    user_id: '' as number | '',
-    token: '',
-    skeleton: true,
-    is_status: 1,
-
-})
-
-// 初始化数据 我的优惠券
-const initCardData = async () => {
-    const data: CouponApi_getList = {
-        is_status: defData.is_status as 1 | 2 | 3 | 4,
-    }
-    const res = await CouponApi.geList(data)
-    await wait(10)
-    defData.skeleton = false
-    if (res.data.value?.code !== 200) return ElMessage.error(res.data.value?.msg)
-    defData.MyCouponList = res.data.value.data.lists
-}
-initCardData()
-
-const onclick = () => {
-    initCardData()
-}
-
-// 删除
-const delClick = async (row: any) => {
-    ElMessageBox.confirm('此操作将永久删除该条内容，是否继续?', '提示', {
-        confirmButtonText: '确认',
-        cancelButtonText: '取消',
-        type: 'warning',
-        buttonSize: 'default',
-    }).then(async () => {
-        const res = await CouponApi.delList({
-            id: row,
-        })
-        if (res.data.value?.code !== 200) {
-            ElMessage.error(res.data.value?.msg)
-            return false
-        }
-        ElMessage.success('删除成功')
-        initCardData()
-    }).catch(() => { })
-}
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style scoped>
 .card-header {

@@ -1,3 +1,33 @@
+<script lang="ts" setup>
+import HeaderClassify from './HeaderClassify.vue'
+import HeaderMenu from './HeaderMenu.vue'
+
+import HeaderBanner from './HeaderBanner.vue'
+import HeaderUser from './HeaderUser.vue'
+
+// import HeaderBanner2 from './HeaderBanner2.vue'
+
+const route = useRoute()
+
+const isIndex = computed(() => {
+    return route.path === '/'
+})
+const defData = reactive({
+    activeList: [] as HomeApi_GetBannerItem[],
+})
+
+// 获取活动专区广告
+const { data: banner, error } = await useFetch<{ data: HomeApi_GetBannerResponse } & ResponseCodeMsg>('/api/main/banner', {
+    method: 'post',
+    body: {
+        position_id: 3,
+    },
+})
+if (!error.value && banner.value?.code === 200) {
+    defData.activeList = banner.value.data.lists
+}
+</script>
+
 <template>
     <div class="nav-banner" :class="isIndex ? 'index' : ''">
         <div class="nav">
@@ -33,36 +63,6 @@
         </div>
     </div>
 </template>
-
-<script lang="ts" setup>
-import HeaderClassify from './HeaderClassify.vue'
-import HeaderMenu from './HeaderMenu.vue'
-
-import HeaderBanner from './HeaderBanner.vue'
-import HeaderUser from './HeaderUser.vue'
-
-// import HeaderBanner2 from './HeaderBanner2.vue'
-
-const route = useRoute()
-
-const isIndex = computed(() => {
-    return route.path === '/'
-})
-const defData = reactive({
-    activeList: [] as HomeApi_GetBannerItem[],
-})
-
-// 获取活动专区广告
-const { data: banner, error } = await useFetch<{ data: HomeApi_GetBannerResponse } & ResponseCodeMsg>('/api/main/banner', {
-    method: 'post',
-    body: {
-        position_id: 3,
-    },
-})
-if (!error.value && banner.value?.code === 200) {
-    defData.activeList = banner.value.data.lists
-}
-</script>
 
 <style lang="scss" scoped>
 .nav-banner {

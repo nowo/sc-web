@@ -62,7 +62,7 @@ router.use('/confirm', defineEventHandler(async (event) => {
         if (res.code !== 200) return { code: res.code, msg: res.msg }
         data = res.data
     } else if (params.goods_id) {
-        const numReg = /^[1-9][0-9]*$/ // 检查数字是否合法或不包含数字的正则表达式 或 空或空字符串
+        const numReg = /^[1-9]\d*$/ // 检查数字是否合法或不包含数字的正则表达式 或 空或空字符串
 
         const num = numReg.test(params.goods_number) ? (Number(params.goods_number) || 1) : 1
         const pam = {

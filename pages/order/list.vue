@@ -1,128 +1,4 @@
 <!-- 订单列表 -->
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="mb20px flex items-center">
-                    <el-skeleton-item class="mr10px py15px w10%!" />
-                    <el-skeleton-item class="mr20px py15px w20%!" />
-                    <el-skeleton-item class="mr10px py15px w10%!" />
-                    <el-skeleton-item class="mr20px py15px w20%!" />
-                    <el-skeleton-item class="mr15px py15px w10%!" />
-                    <el-skeleton-item class="py15px w10%!" />
-                </div>
-                <div class="min-h500px">
-                    <el-skeleton class="mb20px" />
-                    <el-skeleton :rows="5" />
-                </div>
-            </template>
-            <CoTableTool :data="searchData" inline @submit.prevent="onSearch">
-                <template #pay_type="{ row }">
-                    <el-select v-model="row.pay_type" clearable filterable placeholder="">
-                        <el-option v-for="(item, index) in defData.payList" :key="index" :label="item" :value="index" />
-                    </el-select>
-                </template>
-                <template #status="{ row }">
-                    <el-select v-model="row.status" filterable clearable placeholder="">
-                        <el-option v-for="(item, index) in defData.stateList" :key="index" :label="item" :value="index" />
-                    </el-select>
-                </template>
-                <template #time="{ row }">
-                    <CoDatePicker v-model="row.time" />
-                </template>
-            </CoTableTool>
-            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" class="table-box"
-                :data="tableData.data" :row-class-name="setRowClassName" :span-method="arraySpanMethod" auto-height
-                scrollbar-always-on border @update:page="onHandleCurrentChange">
-                <template #main_order_no="{ scopes }">
-                    <div v-if="scopes.row.index" class="flex justify-between">
-                        <div>
-                            订单编号：<span class="mr8px c-#000">{{ scopes.row.main_order_no }}</span>
-                            下单时间：<span>{{ scopes.row.cerate_time }}</span>
-                        </div>
-                        <div v-if="scopes.row.pay_type === 3 && scopes.row.order_status === 1" class="flex items-center">
-                            <i class="i-ep-clock mr3px mt2px" />
-                            <el-countdown title="" format="[倒计时 剩余]DD[天]HH[时]mm[分]ss[秒]" :value="setEndTime(scopes.row)"
-                                value-style="font-size:13px;" @finish="onFinish(scopes.row)" />
-                        </div>
-                    </div>
-                    <ul v-else class="goods-list">
-                        <li v-for="item in scopes.row.goods_info" :key="item.goods_id">
-                            <CoImage class="h50px w50px" :src="item.goods_img" :icon-size="24" />
-                            <div class="flex-1 pl10px">
-                                <h3 class="tle">
-                                    <NuxtLink :to="`/goods/${item.goods_sn}`" target="_blank">
-                                        {{ item.goods_name }}
-                                    </NuxtLink>
-                                </h3>
-                                <div class="pce text-12px c-#888">
-                                    价格：<span class="mr5px">￥{{ item.price }}</span>
-                                    数量：<span>{{ item.goods_number }}</span>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </template>
-                <template #meet_price="{ scopes }">
-                    <div v-if="scopes.row.index" />
-                    <div v-else class="goods-amount">
-                        <!-- <p>总金额：{{ scopes.row.total_price }}</p>
-          <p>优惠金额：{{ scopes.row.coupon_price }}</p>
-          <p>实付金额(含运费)：¥{{ scopes.row.meet_price }}</p> -->
-                        <p class="text-12px">
-                            优惠金额：-{{ setPreferMoney(scopes.row) }}
-                        </p>
-                        <p class="truncate c-#000" :title="`￥${scopes.row.meet_price}`">
-                            实付金额: <span class="c-#f00">￥{{ scopes.row.meet_price }}</span>
-                        </p>
-                        <p class="b-t-1 text-12px">
-                            <span v-if="scopes.row.pay_type === 1">微信支付</span>
-                            <span v-else-if="scopes.row.pay_type === 2">支付宝支付</span>
-                            <span v-else-if="scopes.row.pay_type === 3">线下支付</span>
-                            <span v-else>--</span>
-                        </p>
-                    </div>
-                </template>
-                <template #consignee_name="{ scopes }">
-                    <div v-if="scopes.row.index">
-                        <!--  -->
-                    </div>
-                    <div v-else>
-                        <p>
-                            <span class="mr5px">{{ scopes.row.consignee_name }}</span>
-                            <span>{{ scopes.row.consignee_phone }}</span>
-                        </p>
-                        <p>{{ setAddressText(scopes.row) }}</p>
-                    </div>
-                </template>
-                <template #order_status="{ scopes }">
-                    <div v-if="scopes.row.index" />
-                    <div v-else class="cur-button">
-                        <el-button :type="setTagType(scopes.row.order_status).type"
-                            :color="setTagType(scopes.row.order_status).color" size="small" plain
-                            class="pointer-events-none op-60">
-                            {{ setTagType(scopes.row.order_status).text }}
-                        </el-button>
-                        <div class="mt3px">
-                            <el-button link type="primary" size="small" @click="onDetail(scopes.row)">
-                                订单详情
-                            </el-button>
-                        </div>
-                    </div>
-                </template>
-
-                <template #operate="{ scopes }">
-                    <template v-if="!scopes.row.index">
-                        <OrderOperate size="small" link
-                            :data="{ order_no: scopes.row.main_order_no, status: scopes.row.order_status, bill_status: scopes.row.bill_status, is_return: scopes.row.is_refund }"
-                            @update="setTableList" />
-                    </template>
-                </template>
-            </CoTable>
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import type { TableColumnCtx } from 'element-plus'
 import { OrderApi } from '~/api/goods/order'
@@ -144,7 +20,13 @@ const defData = reactive({
         3: '线下',
     },
     stateList: { // 待支付 1，待发货 2，已发货 3，配货中 4，部分发货 5，已完成 6，已取消 7
-        1: '待支付', 2: '待发货', 3: '待确认', 4: '配货中', 5: '部分发货', 6: '已完成', 7: '已取消',
+        1: '待支付',
+        2: '待发货',
+        3: '待确认',
+        4: '配货中',
+        5: '部分发货',
+        6: '已完成',
+        7: '已取消',
     },
 
 })
@@ -194,7 +76,7 @@ const tableData = reactive<BaseTableDataType<TableDataItem>>({
     ],
     pagination: {
         ...PAGINATION,
-        page: /^[1-9][0-9]*$/.test(page.value) ? Number(page.value) : 1,
+        page: /^[1-9]\d*$/.test(page.value) ? Number(page.value) : 1,
     },
 })
 
@@ -391,6 +273,130 @@ const setTableList = (status: number) => {
 
 initTableData()
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="mb20px flex items-center">
+                    <el-skeleton-item class="mr10px py15px w10%!" />
+                    <el-skeleton-item class="mr20px py15px w20%!" />
+                    <el-skeleton-item class="mr10px py15px w10%!" />
+                    <el-skeleton-item class="mr20px py15px w20%!" />
+                    <el-skeleton-item class="mr15px py15px w10%!" />
+                    <el-skeleton-item class="py15px w10%!" />
+                </div>
+                <div class="min-h500px">
+                    <el-skeleton class="mb20px" />
+                    <el-skeleton :rows="5" />
+                </div>
+            </template>
+            <CoTableTool :data="searchData" inline @submit.prevent="onSearch">
+                <template #pay_type="{ row }">
+                    <el-select v-model="row.pay_type" clearable filterable placeholder="">
+                        <el-option v-for="(item, index) in defData.payList" :key="index" :label="item" :value="index" />
+                    </el-select>
+                </template>
+                <template #status="{ row }">
+                    <el-select v-model="row.status" filterable clearable placeholder="">
+                        <el-option v-for="(item, index) in defData.stateList" :key="index" :label="item" :value="index" />
+                    </el-select>
+                </template>
+                <template #time="{ row }">
+                    <CoDatePicker v-model="row.time" />
+                </template>
+            </CoTableTool>
+            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" class="table-box"
+                :data="tableData.data" :row-class-name="setRowClassName" :span-method="arraySpanMethod" auto-height
+                scrollbar-always-on border @update:page="onHandleCurrentChange">
+                <template #main_order_no="{ scopes }">
+                    <div v-if="scopes.row.index" class="flex justify-between">
+                        <div>
+                            订单编号：<span class="mr8px c-#000">{{ scopes.row.main_order_no }}</span>
+                            下单时间：<span>{{ scopes.row.cerate_time }}</span>
+                        </div>
+                        <div v-if="scopes.row.pay_type === 3 && scopes.row.order_status === 1" class="flex items-center">
+                            <i class="i-ep-clock mr3px mt2px" />
+                            <el-countdown title="" format="[倒计时 剩余]DD[天]HH[时]mm[分]ss[秒]" :value="setEndTime(scopes.row)"
+                                value-style="font-size:13px;" @finish="onFinish(scopes.row)" />
+                        </div>
+                    </div>
+                    <ul v-else class="goods-list">
+                        <li v-for="item in scopes.row.goods_info" :key="item.goods_id">
+                            <CoImage class="h50px w50px" :src="item.goods_img" :icon-size="24" />
+                            <div class="flex-1 pl10px">
+                                <h3 class="tle">
+                                    <NuxtLink :to="`/goods/${item.goods_sn}`" target="_blank">
+                                        {{ item.goods_name }}
+                                    </NuxtLink>
+                                </h3>
+                                <div class="pce text-12px c-#888">
+                                    价格：<span class="mr5px">￥{{ item.price }}</span>
+                                    数量：<span>{{ item.goods_number }}</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </template>
+                <template #meet_price="{ scopes }">
+                    <div v-if="scopes.row.index" />
+                    <div v-else class="goods-amount">
+                        <!-- <p>总金额：{{ scopes.row.total_price }}</p>
+          <p>优惠金额：{{ scopes.row.coupon_price }}</p>
+          <p>实付金额(含运费)：¥{{ scopes.row.meet_price }}</p> -->
+                        <p class="text-12px">
+                            优惠金额：-{{ setPreferMoney(scopes.row) }}
+                        </p>
+                        <p class="truncate c-#000" :title="`￥${scopes.row.meet_price}`">
+                            实付金额: <span class="c-#f00">￥{{ scopes.row.meet_price }}</span>
+                        </p>
+                        <p class="b-t-1 text-12px">
+                            <span v-if="scopes.row.pay_type === 1">微信支付</span>
+                            <span v-else-if="scopes.row.pay_type === 2">支付宝支付</span>
+                            <span v-else-if="scopes.row.pay_type === 3">线下支付</span>
+                            <span v-else>--</span>
+                        </p>
+                    </div>
+                </template>
+                <template #consignee_name="{ scopes }">
+                    <div v-if="scopes.row.index">
+                        <!--  -->
+                    </div>
+                    <div v-else>
+                        <p>
+                            <span class="mr5px">{{ scopes.row.consignee_name }}</span>
+                            <span>{{ scopes.row.consignee_phone }}</span>
+                        </p>
+                        <p>{{ setAddressText(scopes.row) }}</p>
+                    </div>
+                </template>
+                <template #order_status="{ scopes }">
+                    <div v-if="scopes.row.index" />
+                    <div v-else class="cur-button">
+                        <el-button :type="setTagType(scopes.row.order_status).type"
+                            :color="setTagType(scopes.row.order_status).color" size="small" plain
+                            class="pointer-events-none op-60">
+                            {{ setTagType(scopes.row.order_status).text }}
+                        </el-button>
+                        <div class="mt3px">
+                            <el-button link type="primary" size="small" @click="onDetail(scopes.row)">
+                                订单详情
+                            </el-button>
+                        </div>
+                    </div>
+                </template>
+
+                <template #operate="{ scopes }">
+                    <template v-if="!scopes.row.index">
+                        <OrderOperate size="small" link
+                            :data="{ order_no: scopes.row.main_order_no, status: scopes.row.order_status, bill_status: scopes.row.bill_status, is_return: scopes.row.is_refund }"
+                            @update="setTableList" />
+                    </template>
+                </template>
+            </CoTable>
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style  lang="scss" scoped>
 .table-box {

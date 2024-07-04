@@ -22,9 +22,9 @@ export const SaleAfterApi = {
     type: () => useHttp<SaleAfterApi_TypeResponse[]>('/api/mall_user/get_goods_type', '', { method: 'post' }),
 
     /**
-      * 安装、维护申请
-      * @returns
-      */
+     * 安装、维护申请
+     * @returns
+     */
     add: (data: SaleAfterApi_Add) => useHttp('/api/mall_user/add_after_sales', data, { method: 'post' }),
 
     /**

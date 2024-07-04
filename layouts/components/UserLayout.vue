@@ -1,3 +1,7 @@
+<script lang="ts" setup>
+
+</script>
+
 <template>
     <div class="container">
         <el-container class="layout-box">
@@ -104,10 +108,6 @@
         </el-container>
     </div>
 </template>
-
-<script lang="ts" setup>
-
-</script>
 
 <style lang="scss" scoped>
 .router-link-active {

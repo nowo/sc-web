@@ -1,41 +1,3 @@
-<template>
-    <LayoutUser>
-        <el-breadcrumb>
-            <el-breadcrumb-item>
-                账户管理
-            </el-breadcrumb-item>
-            <el-breadcrumb-item>推荐管理</el-breadcrumb-item>
-        </el-breadcrumb>
-        <div class="mt25px w450px">
-            <div style="font-weight: bold">
-                推荐分享
-            </div>
-            <el-form class="mt20px" label-position="top">
-                <el-form-item label="复制链接分享给好友，可获得工游豆">
-                    <el-input v-model="defData.shareLink" class="pr12px w70%!" disabled />
-                    <el-button type="primary" class="w30%" @click="onCopy()">
-                        复制地址
-                    </el-button>
-                </el-form-item>
-            </el-form>
-        </div>
-        <div style="font-weight: bold">
-            分享记录
-        </div>
-        <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
-            auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
-            <!-- <template #is_default="{ scopes }">
-                <el-tag v-if="scopes.row.is_default" type="success" size="small">
-                    是
-                </el-tag>
-                <el-tag v-else type="info" size="small">
-                    否
-                </el-tag>
-            </template> -->
-        </CoTable>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import QRCode from 'qrcode'
 import { RecommendApi } from '~/api/user/recommend'
@@ -109,5 +71,43 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <el-breadcrumb>
+            <el-breadcrumb-item>
+                账户管理
+            </el-breadcrumb-item>
+            <el-breadcrumb-item>推荐管理</el-breadcrumb-item>
+        </el-breadcrumb>
+        <div class="mt25px w450px">
+            <div style="font-weight: bold">
+                推荐分享
+            </div>
+            <el-form class="mt20px" label-position="top">
+                <el-form-item label="复制链接分享给好友，可获得工游豆">
+                    <el-input v-model="defData.shareLink" class="pr12px w70%!" disabled />
+                    <el-button type="primary" class="w30%" @click="onCopy()">
+                        复制地址
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+        <div style="font-weight: bold">
+            分享记录
+        </div>
+        <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
+            auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
+            <!-- <template #is_default="{ scopes }">
+                <el-tag v-if="scopes.row.is_default" type="success" size="small">
+                    是
+                </el-tag>
+                <el-tag v-else type="info" size="small">
+                    否
+                </el-tag>
+            </template> -->
+        </CoTable>
+    </LayoutUser>
+</template>
 
 <style scoped></style>

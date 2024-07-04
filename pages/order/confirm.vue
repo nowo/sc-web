@@ -1,4 +1,386 @@
 <!-- 订单确认 -->
+<script lang="ts" setup>
+import type { FormInstance, FormRules } from 'element-plus'
+import { OrderApi } from '~/api/goods/order'
+import { UserAddressApi } from '~/api/user/address'
+import { UserAddressModel, UserInvoiceModel } from '#components'
+import { UserInvoiceApi } from '~/api/user/invoice'
+
+// 购物车数量，全局
+const useCartNumber = useCartNumberState()
+const { systemStatus } = useSystemState() // 商城状态
+
+const router = useRouter()
+const backRoute = ref(router.options.history.state.back as string)
+
+const modelRef = ref<InstanceType<typeof UserAddressModel>>()
+const invoiceRef = ref<InstanceType<typeof UserInvoiceModel>>()
+const formRef = ref<FormInstance>()
+
+const cart_id = useRouteQuery('cart_id') // 购物车id
+const goods_id = useRouteQuery('goods_id') // 商品id
+const goods_number = useRouteQuery('goods_number') // 商品数量
+
+const defData = reactive({
+    skeleton: true, // 默认打开骨架屏
+    type: 1, // 添加收货地址使用 1：收货地址 2：发票地址
+    addressList: [] as UserAddressApi_GetListResponse[], // 用户地址列表
+    ready: true, // 页面正确
+
+    invoiceList: [] as UserInvoiceApi_getListResponse[], // 所有发票列表
+
+    couponList: [] as OrderApi_GetSettleResponse['coupon_list'], // 优惠券列表
+    count_number: 0, // 商品总数量
+    total_price: 0, // 订单总金额
+    total_peas: 0, // 该订单可用工游豆
+    user_peas: 0, // 当前可用工游豆
+    freight_price: 0, // 运费
+    ratio_scale: 0, // 工游豆换算金额的比例
+
+    btnLoading: false,
+})
+
+const form = reactive({
+    tableData: [] as OrderApi_GetSettleResponse['goods_list'],
+
+    payType: 1, // 支付方式 1-在线，  2：对公转账
+    address_id: '' as '' | number, // 地址id
+    bill_address_id: '' as '' | number, // 发票地址
+
+    is_invoice: 0, // 是否开发票 1：是 0：否 （默认1）
+    invoice_id: '' as '' | number, // 发票id
+
+    coupon_id: '' as '' | number, // 使用的优惠券编号或编号列表（可选）
+    is_peas: 1, // 是否使用工游豆 1：是 0：否 (默认为1)
+    peas_number: 0, // 使用的工游豆数量
+    remark: '', // 备注信息
+})
+
+const rules = reactive<FormRules>({
+    address_id: [{ required: true, message: '请设置收货地址', trigger: 'change' }],
+    bill_address_id: [{ required: true, message: '请设置发票收货地址', trigger: 'change' }],
+    invoice_id: [{ required: true, message: '请选择发票', trigger: 'change' }],
+})
+
+// 增值税发票
+const invoiceData = computed(() => {
+    const obj: {
+        [key: string]: UserInvoiceApi_getListResponse[]
+    } = {}
+    defData.invoiceList.forEach((item) => {
+        if (!obj[item.type]) {
+            obj[item.type] = []
+        }
+        obj[item.type].push(item)
+    })
+
+    return [obj]
+})
+
+// 面包屑导航
+const breadcrumbData = computed(() => {
+    const _list = [
+        { text: '首页', href: '/', id: 1 },
+        { text: '购物车', href: '/order/cart', id: 2 },
+        { text: '订单结算', href: '', id: 3 },
+    ]
+    // 不是从购物车进入时，删除进入购物车那项
+    if (!backRoute.value?.includes('/order/cart')) {
+        _list.splice(1, 1)
+    }
+    return _list
+})
+
+// 工游豆可用最大最小数量
+const peasNumber = computed(() => {
+    const min = 0
+    const max = defData.user_peas > defData.total_peas ? defData.total_peas : defData.user_peas
+    return { min, max }
+})
+
+// 优惠金额
+const preferMoney = computed(() => {
+    const node = defData.couponList.find(item => item.coupon_draw_id === form.coupon_id)
+    if (!node) return 0
+    return Number(node.par_value)
+})
+// 工游豆抵扣金额
+const beanMoney = computed(() => {
+    if (!form.is_peas) return 0
+    if (!form.peas_number || !defData.ratio_scale) return 0
+    return form.peas_number / defData.ratio_scale
+})
+
+// 需支付金额
+const payMoney = computed(() => {
+    const money = defData.total_price + defData.freight_price - beanMoney.value - preferMoney.value
+    return money > 0 ? money : 0
+})
+
+// 获取结算的商品信息
+const initGoodsData = async () => {
+    // const num = Number(goods_number.value) ? (Number(goods_number.value) > 10000 ? 9999 : Number(goods_number.value)) : ''
+    const num = Number(goods_number.value) || ''
+    const { data, error } = await useFetch<{ data: OrderApi_GetSettleResponse } & ResponseCodeMsg>('/api/order/confirm', {
+        method: 'POST',
+        body: {
+            cart_id: cart_id.value,
+            goods_id: Number(goods_id.value),
+            goods_number: num,
+            address_id: form.address_id,
+        },
+    })
+
+    // console.log(pending.value)
+    await nextTick()
+    // await wait(800)
+    // console.log(pending.value)
+    // console.log(error.value)
+    // console.log('data.value?.code :>> ', data.value?.code)
+    // 请求错误处理
+    if (error.value) {
+        return defData.ready = false
+    }
+    if (data.value?.code !== 200) {
+        ElMessage.error(data.value?.msg)
+        return defData.ready = false
+    }
+    return data.value.data
+}
+
+// 初始化收货地址，选中默认地址
+const initAddressData = async () => {
+    const res2 = await UserAddressApi.getList()
+    await wait(350)
+    await nextTick()
+    if (res2 && res2.data.value?.code === 200) {
+        const data = res2.data.value?.data
+        defData.addressList = data
+
+        // 选中默认地址
+        const node = defData.addressList.find(item => item.is_default === 1)
+        form.address_id = node?.address_id || ''
+
+        const node2 = defData.addressList.find(item => item.is_bill_address === 1)
+        form.bill_address_id = node2?.address_id || ''
+    }
+}
+
+const initDefaultData = async () => {
+    const numReg = /^[1-9]\d*$/ // 检查数字是否合法或不包含数字的正则表达式 或 空或空字符串
+
+    if (!cart_id.value && !numReg.test(goods_id.value)) {
+        defData.skeleton = false
+        defData.ready = false
+        return
+    }
+
+    // 先获取用户地址,选中地址设置运费
+    await initAddressData()
+
+    // 获取结算商品信息、发票列表
+    const res1 = await initGoodsData()
+    await wait(300)
+    defData.skeleton = false
+    // console.log(res1)
+    if (!res1) return defData.ready = false
+
+    const data = res1
+    // console.log('data :>> ', data)
+    // 未获取到商品时
+    if (!data.goods_list.length) return defData.ready = false
+
+    form.tableData = data.goods_list.map((item) => {
+        item.goods_img = setGoodsOssImg(item.goods_img, 60)
+        return item
+    })
+    defData.couponList = data.coupon_list
+    if (defData.couponList.length) {
+        form.coupon_id = defData.couponList[0].coupon_draw_id
+    }
+
+    defData.count_number = data.number
+    defData.total_price = Number(data.total_price)
+    defData.total_peas = Math.floor(data.total_peas || 0)
+    defData.user_peas = data.user_peas
+    defData.freight_price = Number(data.freight_price)
+
+    defData.ratio_scale = data.matrixing_scale || 0
+}
+
+// 初始化发票列表
+const initInvoiceData = async () => {
+    // 不开发票时，不调用接口
+    if (!systemStatus.value.is_bill) return false
+    const res3 = await UserInvoiceApi.getList()
+    await wait(300)
+    if (res3 && res3.data.value?.code === 200) {
+        const data = res3.data.value?.data
+        defData.invoiceList = data
+    }
+}
+
+// 地址信息拼接
+const setAddressText = (row: UserAddressApi_GetListResponse) => {
+    return setArrayTextName([row.province, row.city, row.area, row.address], '  ')
+}
+
+// 地址选中(设置运费)
+const onChooseAddress = async () => {
+    // 位置移动
+    // const index = defData.addressList.findIndex(item => item.address_id === form.address_id)
+    // if (index > 0) defData.addressList = moveArraySite(defData.addressList, index, 0)
+
+    // 运费更新
+    const dat = await initGoodsData()
+    if (dat) defData.freight_price = dat.freight_price
+}
+
+/**
+ * 新增地址、新增发票
+ * @param type 1：收货地址 2：发票地址，3、新增发票
+ */
+const onAddressInvoice = async (type: 1 | 2 | 3) => {
+    defData.type = type
+    if (type === 1 || type === 2) {
+        modelRef.value?.onOpenDialog()
+    } else {
+        invoiceRef.value?.onOpenDialog()
+    }
+}
+
+// 新增地址处理
+const getAddress = (params: UserAddressApi_Edit) => {
+    if (!params.address_id) return
+    const dat = {
+        ...params,
+        user_id: 0,
+    }
+    defData.addressList.push(dat)
+
+    if (defData.type === 1) {
+        form.address_id = params.address_id
+        onChooseAddress() // 更新运费
+    } else if (defData.type === 2) {
+        form.bill_address_id = params.address_id
+    }
+}
+
+/**
+ * 获取新增的发票数据
+ */
+const getInvoice = (params: UserInvoiceApi_Edit) => {
+    if (!params) return
+
+    defData.invoiceList.push({
+        ...params,
+        header: params.enterprise_name,
+        is_default: 0,
+    })
+
+    form.invoice_id = params.bill_header_id
+}
+
+// 选择优惠券
+const choseCoupon = (id: number) => {
+    form.coupon_id = id
+}
+
+// 提交订单
+const onSubmit = async () => {
+    const isRun = await useFormVerify(formRef.value)
+    if (!isRun) return false
+
+    let goods_peas = Number(form.peas_number)
+    if (!form.is_peas || !goods_peas) { // 不使用工游豆，或者工豆为0时
+        form.is_peas = 0
+        goods_peas = 0
+    }
+
+    const params: OrderApi_ConfirmSettle = {
+        is_peas: form.is_peas,
+        goods_peas,
+        address_id: Number(form.address_id),
+        coupon_draw_id: form.coupon_id || 0,
+        remarks: form.remark,
+        pay_type: form.payType === 1 ? 1 : 2,
+        bill_status: form.is_invoice ? 1 : 0, // 是否开票
+        type: '',
+        header: '',
+        tax_no: '',
+        enterprise_name: '',
+        enterprise_email: '',
+        logon_tel: '',
+        logon_addr: '',
+        bank: '',
+        bank_account: '',
+        bill_address_id: '',
+    }
+
+    // 进行开票
+    if (params.bill_status) {
+        const invoice = defData.invoiceList.find(item => item.bill_header_id === form.invoice_id)
+
+        if (invoice) {
+            params.bill_address_id = form.bill_address_id
+            params.type = invoice.type
+            params.header = invoice.header
+            params.tax_no = invoice.tax_no
+            params.enterprise_name = invoice.enterprise_name
+            params.enterprise_email = invoice.enterprise_email
+
+            if (invoice.type === 1) {
+                params.logon_tel = invoice.logon_tel
+                params.logon_addr = invoice.logon_addr
+                params.bank = invoice.bank
+                params.bank_account = invoice.bank_account
+            }
+        }
+        //
+    }
+
+    // const resp = await useFetch('/api/test', {
+    //     method: 'post',
+    //     body: params,
+    // })
+    // console.log(resp)
+    // console.log('params :>> ', params)
+    // return
+    defData.btnLoading = true
+    const { data: res, error } = await OrderApi.confirmSettle(params)
+    defData.btnLoading = false
+
+    if (error.value) return
+    if (res.value?.code === 200) {
+        ElMessage.success('提交成功')
+        const order_no = res.value.data.main_order_no
+
+        // 从购物车来下单的，更新购物车商品数量
+        if (cart_id.value) useCartNumber.setCartNumber()
+
+        navigateTo({
+            path: '/order/pay',
+            query: {
+                order_no, // 订单编号，
+            },
+        })
+    } else {
+        ElMessage.error(res.value?.msg)
+    }
+}
+
+onBeforeMount(() => {
+    initDefaultData()
+    // 默认不开发票，获取发票列表可以慢点执行，
+    initInvoiceData()
+})
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <section class="text-14px">
         <div class="container">
@@ -251,388 +633,6 @@
         <UserInvoiceModel ref="invoiceRef" @update="getInvoice" />
     </section>
 </template>
-
-<script lang="ts" setup>
-import type { FormInstance, FormRules } from 'element-plus'
-import { OrderApi } from '~/api/goods/order'
-import { UserAddressApi } from '~/api/user/address'
-import { UserAddressModel, UserInvoiceModel } from '#components'
-import { UserInvoiceApi } from '~/api/user/invoice'
-
-// 购物车数量，全局
-const useCartNumber = useCartNumberState()
-const { systemStatus } = useSystemState() // 商城状态
-
-const router = useRouter()
-const backRoute = ref(router.options.history.state.back as string)
-
-const modelRef = ref<InstanceType<typeof UserAddressModel>>()
-const invoiceRef = ref<InstanceType<typeof UserInvoiceModel>>()
-const formRef = ref<FormInstance>()
-
-const cart_id = useRouteQuery('cart_id') // 购物车id
-const goods_id = useRouteQuery('goods_id') // 商品id
-const goods_number = useRouteQuery('goods_number') // 商品数量
-
-const defData = reactive({
-    skeleton: true, // 默认打开骨架屏
-    type: 1, // 添加收货地址使用 1：收货地址 2：发票地址
-    addressList: [] as UserAddressApi_GetListResponse[], // 用户地址列表
-    ready: true, // 页面正确
-
-    invoiceList: [] as UserInvoiceApi_getListResponse[], // 所有发票列表
-
-    couponList: [] as OrderApi_GetSettleResponse['coupon_list'], // 优惠券列表
-    count_number: 0, // 商品总数量
-    total_price: 0, // 订单总金额
-    total_peas: 0, // 该订单可用工游豆
-    user_peas: 0, // 当前可用工游豆
-    freight_price: 0, // 运费
-    ratio_scale: 0, // 工游豆换算金额的比例
-
-    btnLoading: false,
-})
-
-const form = reactive({
-    tableData: [] as OrderApi_GetSettleResponse['goods_list'],
-
-    payType: 1, // 支付方式 1-在线，  2：对公转账
-    address_id: '' as '' | number, // 地址id
-    bill_address_id: '' as '' | number, // 发票地址
-
-    is_invoice: 0, // 是否开发票 1：是 0：否 （默认1）
-    invoice_id: '' as '' | number, // 发票id
-
-    coupon_id: '' as '' | number, // 使用的优惠券编号或编号列表（可选）
-    is_peas: 1, // 是否使用工游豆 1：是 0：否 (默认为1)
-    peas_number: 0, // 使用的工游豆数量
-    remark: '', // 备注信息
-})
-
-const rules = reactive<FormRules>({
-    address_id: [{ required: true, message: '请设置收货地址', trigger: 'change' }],
-    bill_address_id: [{ required: true, message: '请设置发票收货地址', trigger: 'change' }],
-    invoice_id: [{ required: true, message: '请选择发票', trigger: 'change' }],
-})
-
-// 增值税发票
-const invoiceData = computed(() => {
-    const obj: {
-        [key: string]: UserInvoiceApi_getListResponse[]
-    } = {}
-    defData.invoiceList.forEach((item) => {
-        if (!obj[item.type]) {
-            obj[item.type] = []
-        }
-        obj[item.type].push(item)
-    })
-
-    return [obj]
-})
-
-// 面包屑导航
-const breadcrumbData = computed(() => {
-    const _list = [
-        { text: '首页', href: '/', id: 1 },
-        { text: '购物车', href: '/order/cart', id: 2 },
-        { text: '订单结算', href: '', id: 3 },
-    ]
-    // 不是从购物车进入时，删除进入购物车那项
-    if (!backRoute.value?.includes('/order/cart')) {
-        _list.splice(1, 1)
-    }
-    return _list
-})
-
-// 工游豆可用最大最小数量
-const peasNumber = computed(() => {
-    const min = 0
-    const max = defData.user_peas > defData.total_peas ? defData.total_peas : defData.user_peas
-    return { min, max }
-})
-
-// 优惠金额
-const preferMoney = computed(() => {
-    const node = defData.couponList.find(item => item.coupon_draw_id === form.coupon_id)
-    if (!node) return 0
-    return Number(node.par_value)
-})
-// 工游豆抵扣金额
-const beanMoney = computed(() => {
-    if (!form.is_peas) return 0
-    if (!form.peas_number || !defData.ratio_scale) return 0
-    return form.peas_number / defData.ratio_scale
-})
-
-// 需支付金额
-const payMoney = computed(() => {
-    const money = defData.total_price + defData.freight_price - beanMoney.value - preferMoney.value
-    return money > 0 ? money : 0
-})
-
-const initDefaultData = async () => {
-    const numReg = /^[1-9][0-9]*$/ // 检查数字是否合法或不包含数字的正则表达式 或 空或空字符串
-
-    if (!cart_id.value && !numReg.test(goods_id.value)) {
-        defData.skeleton = false
-        defData.ready = false
-        return
-    }
-
-    // 先获取用户地址,选中地址设置运费
-    await initAddressData()
-
-    // 获取结算商品信息、发票列表
-    const res1 = await initGoodsData()
-    await wait(300)
-    defData.skeleton = false
-    // console.log(res1)
-    if (!res1) return defData.ready = false
-
-    const data = res1
-    // console.log('data :>> ', data)
-    // 未获取到商品时
-    if (!data.goods_list.length) return defData.ready = false
-
-    form.tableData = data.goods_list.map((item) => {
-        item.goods_img = setGoodsOssImg(item.goods_img, 60)
-        return item
-    })
-    defData.couponList = data.coupon_list
-    if (defData.couponList.length) {
-        form.coupon_id = defData.couponList[0].coupon_draw_id
-    }
-
-    defData.count_number = data.number
-    defData.total_price = Number(data.total_price)
-    defData.total_peas = Math.floor(data.total_peas || 0)
-    defData.user_peas = data.user_peas
-    defData.freight_price = Number(data.freight_price)
-
-    defData.ratio_scale = data.matrixing_scale || 0
-}
-
-// 获取结算的商品信息
-const initGoodsData = async () => {
-    // const num = Number(goods_number.value) ? (Number(goods_number.value) > 10000 ? 9999 : Number(goods_number.value)) : ''
-    const num = Number(goods_number.value) || ''
-    const { data, error } = await useFetch<{ data: OrderApi_GetSettleResponse } & ResponseCodeMsg>('/api/order/confirm', {
-        method: 'POST',
-        body: {
-            cart_id: cart_id.value,
-            goods_id: Number(goods_id.value),
-            goods_number: num,
-            address_id: form.address_id,
-        },
-    })
-
-    // console.log(pending.value)
-    await nextTick()
-    // await wait(800)
-    // console.log(pending.value)
-    // console.log(error.value)
-    // console.log('data.value?.code :>> ', data.value?.code)
-    // 请求错误处理
-    if (error.value) {
-        return defData.ready = false
-    }
-    if (data.value?.code !== 200) {
-        ElMessage.error(data.value?.msg)
-        return defData.ready = false
-    }
-    return data.value.data
-}
-
-// 初始化收货地址，选中默认地址
-const initAddressData = async () => {
-    const res2 = await UserAddressApi.getList()
-    await wait(350)
-    await nextTick()
-    if (res2 && res2.data.value?.code === 200) {
-        const data = res2.data.value?.data
-        defData.addressList = data
-
-        // 选中默认地址
-        const node = defData.addressList.find(item => item.is_default === 1)
-        form.address_id = node?.address_id || ''
-
-        const node2 = defData.addressList.find(item => item.is_bill_address === 1)
-        form.bill_address_id = node2?.address_id || ''
-    }
-}
-
-// 初始化发票列表
-const initInvoiceData = async () => {
-    // 不开发票时，不调用接口
-    if (!systemStatus.value.is_bill) return false
-    const res3 = await UserInvoiceApi.getList()
-    await wait(300)
-    if (res3 && res3.data.value?.code === 200) {
-        const data = res3.data.value?.data
-        defData.invoiceList = data
-    }
-}
-
-// 地址信息拼接
-const setAddressText = (row: UserAddressApi_GetListResponse) => {
-    return setArrayTextName([row.province, row.city, row.area, row.address], '  ')
-}
-
-// 地址选中(设置运费)
-const onChooseAddress = async () => {
-    // 位置移动
-    // const index = defData.addressList.findIndex(item => item.address_id === form.address_id)
-    // if (index > 0) defData.addressList = moveArraySite(defData.addressList, index, 0)
-
-    // 运费更新
-    const dat = await initGoodsData()
-    if (dat) defData.freight_price = dat.freight_price
-}
-
-/**
- * 新增地址、新增发票
- * @param type 1：收货地址 2：发票地址，3、新增发票
- */
-const onAddressInvoice = async (type: 1 | 2 | 3) => {
-    defData.type = type
-    if (type === 1 || type === 2) {
-        modelRef.value?.onOpenDialog()
-    } else {
-        invoiceRef.value?.onOpenDialog()
-    }
-}
-
-// 新增地址处理
-const getAddress = (params: UserAddressApi_Edit) => {
-    if (!params.address_id) return
-    const dat = {
-        ...params,
-        user_id: 0,
-    }
-    defData.addressList.push(dat)
-
-    if (defData.type === 1) {
-        form.address_id = params.address_id
-        onChooseAddress() // 更新运费
-    } else if (defData.type === 2) {
-        form.bill_address_id = params.address_id
-    }
-}
-
-/**
- * 获取新增的发票数据
- */
-const getInvoice = (params: UserInvoiceApi_Edit) => {
-    if (!params) return
-
-    defData.invoiceList.push({
-        ...params,
-        header: params.enterprise_name,
-        is_default: 0,
-    })
-
-    form.invoice_id = params.bill_header_id
-}
-
-// 选择优惠券
-const choseCoupon = (id: number) => {
-    form.coupon_id = id
-}
-
-// 提交订单
-const onSubmit = async () => {
-    const isRun = await useFormVerify(formRef.value)
-    if (!isRun) return false
-
-    let goods_peas = Number(form.peas_number)
-    if (!form.is_peas || !goods_peas) { // 不使用工游豆，或者工豆为0时
-        form.is_peas = 0
-        goods_peas = 0
-    }
-
-    const params: OrderApi_ConfirmSettle = {
-        is_peas: form.is_peas,
-        goods_peas,
-        address_id: Number(form.address_id),
-        coupon_draw_id: form.coupon_id || 0,
-        remarks: form.remark,
-        pay_type: form.payType === 1 ? 1 : 2,
-        bill_status: form.is_invoice ? 1 : 0, // 是否开票
-        type: '',
-        header: '',
-        tax_no: '',
-        enterprise_name: '',
-        enterprise_email: '',
-        logon_tel: '',
-        logon_addr: '',
-        bank: '',
-        bank_account: '',
-        bill_address_id: '',
-    }
-
-    // 进行开票
-    if (params.bill_status) {
-        const invoice = defData.invoiceList.find(item => item.bill_header_id === form.invoice_id)
-
-        if (invoice) {
-            params.bill_address_id = form.bill_address_id
-            params.type = invoice.type
-            params.header = invoice.header
-            params.tax_no = invoice.tax_no
-            params.enterprise_name = invoice.enterprise_name
-            params.enterprise_email = invoice.enterprise_email
-
-            if (invoice.type === 1) {
-                params.logon_tel = invoice.logon_tel
-                params.logon_addr = invoice.logon_addr
-                params.bank = invoice.bank
-                params.bank_account = invoice.bank_account
-            }
-        }
-        //
-    }
-
-    // const resp = await useFetch('/api/test', {
-    //     method: 'post',
-    //     body: params,
-    // })
-    // console.log(resp)
-    // console.log('params :>> ', params)
-    // return
-    defData.btnLoading = true
-    const { data: res, error } = await OrderApi.confirmSettle(params)
-    defData.btnLoading = false
-
-    if (error.value) return
-    if (res.value?.code === 200) {
-        ElMessage.success('提交成功')
-        const order_no = res.value.data.main_order_no
-
-        // 从购物车来下单的，更新购物车商品数量
-        if (cart_id.value) useCartNumber.setCartNumber()
-
-        navigateTo({
-            path: '/order/pay',
-            query: {
-                order_no, // 订单编号，
-            },
-        })
-    } else {
-        ElMessage.error(res.value?.msg)
-    }
-}
-
-onBeforeMount(() => {
-    initDefaultData()
-    // 默认不开发票，获取发票列表可以慢点执行，
-    initInvoiceData()
-})
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style lang="scss" scoped>
 .sec-box {

@@ -1,3 +1,14 @@
+<script lang="ts" setup>
+import BaseHeader from './components/BaseHeader.vue'
+
+import BaseFooter from './components/BaseFooter.vue'
+import BaseRight from './components/BaseRight.vue'
+import BaseTop from '~/layouts/components/BaseTop.vue'
+
+// import UserAside from '~/layouts/components/UserAside.vue'
+// import UserLayout from '~/layouts/components/UserLayout.vue'
+</script>
+
 <template>
     <div>
         <BaseTop />
@@ -23,14 +34,3 @@
         <BaseRight />
     </div>
 </template>
-
-<script lang="ts" setup>
-import BaseHeader from './components/BaseHeader.vue'
-
-import BaseFooter from './components/BaseFooter.vue'
-import BaseRight from './components/BaseRight.vue'
-import BaseTop from '~/layouts/components/BaseTop.vue'
-
-// import UserAside from '~/layouts/components/UserAside.vue'
-// import UserLayout from '~/layouts/components/UserLayout.vue'
-</script>

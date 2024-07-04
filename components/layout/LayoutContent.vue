@@ -1,47 +1,3 @@
-<template>
-    <div class="layout-content">
-        <div class="container">
-            <el-skeleton :loading="!defData.ready">
-                <el-container class="layout-box">
-                    <el-aside class="left">
-                        <div class="l-tle">
-                            {{ comData.title }}
-                        </div>
-                        <el-divider border-style="dotted" class="m0!" />
-                        <el-menu v-if="CLIENT" class="menu-list" :default-active="activeIndex"
-                            :default-openeds="openList">
-                            <LayoutContentMenu :list="defData.menuList" :url="comData.url" />
-                        </el-menu>
-                    </el-aside>
-                    <el-main class="right min-h500px">
-                        <slot />
-                    </el-main>
-                </el-container>
-                <template #template>
-                    <el-container class="layout-box">
-                        <el-aside class="left">
-                            <div class="l-tle">
-                                <el-skeleton-item />
-                            </div>
-                            <el-divider border-style="dotted" class="m0!" />
-                            <div class="px20px">
-                                <el-skeleton-item class="mt20px" />
-                                <el-skeleton-item class="my10px" />
-                                <el-skeleton-item class="my10px" />
-                                <el-skeleton-item class="my10px" />
-                                <el-skeleton-item class="my10px" />
-                            </div>
-                        </el-aside>
-                        <el-main class="right min-h600px">
-                            <el-skeleton />
-                        </el-main>
-                    </el-container>
-                </template>
-            </el-skeleton>
-        </div>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import { ContentApi } from '~/api/home/content'
 
@@ -109,6 +65,50 @@ watch(() => defData.menuList, () => {
     defData.ready = true
 })
 </script>
+
+<template>
+    <div class="layout-content">
+        <div class="container">
+            <el-skeleton :loading="!defData.ready">
+                <el-container class="layout-box">
+                    <el-aside class="left">
+                        <div class="l-tle">
+                            {{ comData.title }}
+                        </div>
+                        <el-divider border-style="dotted" class="m0!" />
+                        <el-menu v-if="CLIENT" class="menu-list" :default-active="activeIndex"
+                            :default-openeds="openList">
+                            <LayoutContentMenu :list="defData.menuList" :url="comData.url" />
+                        </el-menu>
+                    </el-aside>
+                    <el-main class="right min-h500px">
+                        <slot />
+                    </el-main>
+                </el-container>
+                <template #template>
+                    <el-container class="layout-box">
+                        <el-aside class="left">
+                            <div class="l-tle">
+                                <el-skeleton-item />
+                            </div>
+                            <el-divider border-style="dotted" class="m0!" />
+                            <div class="px20px">
+                                <el-skeleton-item class="mt20px" />
+                                <el-skeleton-item class="my10px" />
+                                <el-skeleton-item class="my10px" />
+                                <el-skeleton-item class="my10px" />
+                                <el-skeleton-item class="my10px" />
+                            </div>
+                        </el-aside>
+                        <el-main class="right min-h600px">
+                            <el-skeleton />
+                        </el-main>
+                    </el-container>
+                </template>
+            </el-skeleton>
+        </div>
+    </div>
+</template>
 
 <style lang="scss" scoped>
 .layout-box {

@@ -1,3 +1,25 @@
+<script lang="ts" setup>
+const useSystem = useSystemState()
+const userState = useUserState()
+const useCartNumber = useCartNumberState()
+
+// 获取商城信息
+const systemInfo = await useSystem.getSystemInfo()
+
+// 用户信息
+const user = await userState.getUserInfo()
+
+const username = computed(() => user.value?.user_name)
+
+// 购物车商品数量
+const number = await useCartNumber.setCartNumber()
+
+// 退出登录
+const onLoginOut = async () => {
+    useLoginOut()
+}
+</script>
+
 <template>
     <section class="header-top">
         <div class="header-cont container">
@@ -61,28 +83,6 @@
         </div>
     </section>
 </template>
-
-<script lang="ts" setup>
-const useSystem = useSystemState()
-const userState = useUserState()
-const useCartNumber = useCartNumberState()
-
-// 获取商城信息
-const systemInfo = await useSystem.getSystemInfo()
-
-// 用户信息
-const user = await userState.getUserInfo()
-
-const username = computed(() => user.value?.user_name)
-
-// 购物车商品数量
-const number = await useCartNumber.setCartNumber()
-
-// 退出登录
-const onLoginOut = async () => {
-    useLoginOut()
-}
-</script>
 
 <style lang="scss" scoped>
 .header-top {

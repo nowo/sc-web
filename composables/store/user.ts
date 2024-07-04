@@ -35,10 +35,10 @@ export const useUserStore = defineStore('user', () => {
     }
 
     /**
-   * 获取用户信息
-   * @param update boolean value 是否获取最新数据，默认false
-   * @returns
-   */
+     * 获取用户信息
+     * @param update boolean value 是否获取最新数据，默认false
+     * @returns
+     */
     const getUserInfo = async (update?: boolean) => {
         if (update) {
             return await getUserData()
@@ -56,8 +56,6 @@ export const useUserStore = defineStore('user', () => {
         token,
         setToken,
     }
-},
-    // {
-    //   persist: true,
-    // }
-)
+}, {
+    //   persist: true,    //
+})

@@ -1,8 +1,3 @@
-<template>
-    <el-date-picker type="datetimerange" :unlink-panels="true" value-format="YYYY-MM-DD HH:mm:ss" range-separator="-"
-        start-placeholder="开始日期" end-placeholder="结束日期" :default-time="defData.defaultTime" v-bind="$attrs" />
-</template>
-
 <script lang="ts" setup>
 const defData = reactive({
     defaultTime: [ // 默认的日期选中格式  '00:00:00', '23:59:59'
@@ -11,5 +6,10 @@ const defData = reactive({
     ] as any,
 })
 </script>
+
+<template>
+    <el-date-picker type="datetimerange" :unlink-panels="true" value-format="YYYY-MM-DD HH:mm:ss" range-separator="-"
+        start-placeholder="开始日期" end-placeholder="结束日期" :default-time="defData.defaultTime" v-bind="$attrs" />
+</template>
 
 <style lang="scss" scoped></style>

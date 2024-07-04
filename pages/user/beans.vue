@@ -1,3 +1,42 @@
+<script setup lang="ts">
+import { BeansApi } from '~/api/user/coupon'
+
+const defData = reactive({
+    tableData: [] as BeansApi_getListResponse['lists'],
+    pears: '' as unknown as number,
+    skeleton: true,
+    page: 1,
+    pageSize: 10,
+    total: 10,
+})
+
+const initTableData = async () => {
+    const data: BeansApi_getList = {
+        type: 0,
+        page: defData.page,
+        page_size: defData.pageSize,
+    }
+    const { data: res } = await BeansApi.geList(data)
+    await wait(10)
+    defData.skeleton = false
+    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
+    defData.tableData = res.value?.data.lists
+    defData.total = res.value?.data.total
+    defData.pears = res.value?.data.peas
+}
+
+// 分页数量点击
+const onHandleSizeChange = () => {
+    initTableData()
+}
+
+initTableData()
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <LayoutUser>
         <el-skeleton :loading="defData.skeleton" animated>
@@ -46,44 +85,5 @@
         </el-skeleton>
     </LayoutUser>
 </template>
-
-<script setup lang="ts">
-import { BeansApi } from '~/api/user/coupon'
-
-const defData = reactive({
-    tableData: [] as BeansApi_getListResponse['lists'],
-    pears: '' as unknown as number,
-    skeleton: true,
-    page: 1,
-    pageSize: 10,
-    total: 10,
-})
-
-const initTableData = async () => {
-    const data: BeansApi_getList = {
-        type: 0,
-        page: defData.page,
-        page_size: defData.pageSize,
-    }
-    const { data: res } = await BeansApi.geList(data)
-    await wait(10)
-    defData.skeleton = false
-    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
-    defData.tableData = res.value?.data.lists
-    defData.total = res.value?.data.total
-    defData.pears = res.value?.data.peas
-}
-
-// 分页数量点击
-const onHandleSizeChange = () => {
-    initTableData()
-}
-
-initTableData()
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style scoped></style>

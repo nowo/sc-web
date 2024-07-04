@@ -1,70 +1,4 @@
 <!-- 购物车 -->
-<template>
-    <section class="pb30px text-14px">
-        <div class="container">
-            <!-- <div class="mx-a my-20px w60%">
-        <GoodsSettleStep :active="1" />
-      </div> -->
-            <el-breadcrumb class="py15px">
-                <el-breadcrumb-item :to="{ path: '/' }">
-                    首页
-                </el-breadcrumb-item>
-                <el-breadcrumb-item>购物车</el-breadcrumb-item>
-            </el-breadcrumb>
-            <div class="table-cart">
-                <ElTable ref="tableRef" :data="defData.tableData" @selection-change="handleSelectionChange">
-                    <el-table-column type="selection" width="55" align="center" />
-                    <el-table-column prop="goods_name" label="商品名称" min-width="180">
-                        <template #default="{ row }">
-                            <div class="h45px flex items-center">
-                                <CoImage class="h45px w45px" :src="row.goods_img" :icon-size="20" />
-                                <div class="flex-1 pl10px">
-                                    <NuxtLink class="goods-link" :to="`/goods/${row.goods_sn}`" target="_blank">
-                                        {{ row.goods_name }}
-                                    </NuxtLink>
-                                </div>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="goods_code" label="商品型号" width="160" />
-                    <el-table-column prop="goods_spec" label="商品规格" width="160" />
-                    <el-table-column prop="shop_price" label="价格" width="120" align="center" />
-                    <el-table-column prop="goods_number" label="商品数量" width="150" align="center">
-                        <template #default="{ row }">
-                            <el-input-number v-model="row.goods_number" class="w100%!" :precision="0" :min="1" :max="9999"
-                                @change="onChangeNumber(row)" />
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="operate" label="操作" width="100" align="center">
-                        <template #default="{ row }">
-                            <el-button type="primary" size="small" link @click="onRemove(row)">
-                                删除
-                            </el-button>
-                        </template>
-                    </el-table-column>
-                </ElTable>
-            </div>
-            <div class="table-cart-count">
-                <div class="lt">
-                    <el-button type="primary" link @click="onRemove('all')">
-                        删除所选商品
-                    </el-button>
-                    <!-- <el-button type="primary" link>
-            继续购物
-          </el-button> -->
-                </div>
-                <div class="gt">
-                    商品总价（未包含运费）： <b class="main-color text-20px">{{ countMoney }}</b> 元
-                    <el-button class="ml5px tracking-2px" type="primary"
-                        :disabled="defData.selectData.length ? false : true" @click="onSettle">
-                        结算商品
-                    </el-button>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup lang="ts">
 import type { TableInstance } from 'element-plus'
 import Big from 'big.js'
@@ -172,6 +106,72 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <section class="pb30px text-14px">
+        <div class="container">
+            <!-- <div class="mx-a my-20px w60%">
+        <GoodsSettleStep :active="1" />
+      </div> -->
+            <el-breadcrumb class="py15px">
+                <el-breadcrumb-item :to="{ path: '/' }">
+                    首页
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>购物车</el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="table-cart">
+                <ElTable ref="tableRef" :data="defData.tableData" @selection-change="handleSelectionChange">
+                    <el-table-column type="selection" width="55" align="center" />
+                    <el-table-column prop="goods_name" label="商品名称" min-width="180">
+                        <template #default="{ row }">
+                            <div class="h45px flex items-center">
+                                <CoImage class="h45px w45px" :src="row.goods_img" :icon-size="20" />
+                                <div class="flex-1 pl10px">
+                                    <NuxtLink class="goods-link" :to="`/goods/${row.goods_sn}`" target="_blank">
+                                        {{ row.goods_name }}
+                                    </NuxtLink>
+                                </div>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="goods_code" label="商品型号" width="160" />
+                    <el-table-column prop="goods_spec" label="商品规格" width="160" />
+                    <el-table-column prop="shop_price" label="价格" width="120" align="center" />
+                    <el-table-column prop="goods_number" label="商品数量" width="150" align="center">
+                        <template #default="{ row }">
+                            <el-input-number v-model="row.goods_number" class="w100%!" :precision="0" :min="1" :max="9999"
+                                @change="onChangeNumber(row)" />
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="operate" label="操作" width="100" align="center">
+                        <template #default="{ row }">
+                            <el-button type="primary" size="small" link @click="onRemove(row)">
+                                删除
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </ElTable>
+            </div>
+            <div class="table-cart-count">
+                <div class="lt">
+                    <el-button type="primary" link @click="onRemove('all')">
+                        删除所选商品
+                    </el-button>
+                    <!-- <el-button type="primary" link>
+            继续购物
+          </el-button> -->
+                </div>
+                <div class="gt">
+                    商品总价（未包含运费）： <b class="main-color text-20px">{{ countMoney }}</b> 元
+                    <el-button class="ml5px tracking-2px" type="primary"
+                        :disabled="defData.selectData.length ? false : true" @click="onSettle">
+                        结算商品
+                    </el-button>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
 
 <style scoped lang="scss">
 .table-cart {

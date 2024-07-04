@@ -46,7 +46,7 @@ export const linkGoodsList = (params: GoodsListParams): string => {
 /**
  * 进入商品页面方法
  */
-export const linkGoodsDetail = (params: { query: GoodsDetailParamsQuery; url: boolean }) => {
+export const linkGoodsDetail = (params: { query: GoodsDetailParamsQuery, url: boolean }) => {
     const url = '/goods/detail'
 
     const data = params.query

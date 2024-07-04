@@ -1,63 +1,3 @@
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="pb20px">
-                    <el-skeleton-item class="w20%!" />
-                </div>
-                <div class="min-h500px">
-                    <el-skeleton :rows="5" />
-                </div>
-            </template>
-            <el-breadcrumb>
-                <el-breadcrumb-item>
-                    账户管理
-                </el-breadcrumb-item>
-                <el-breadcrumb-item>
-                    地址管理
-                </el-breadcrumb-item>
-            </el-breadcrumb>
-            <div class="my15px">
-                <el-button type="primary" @click="onAdd">
-                    新增地址
-                </el-button>
-            </div>
-
-            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
-                auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
-                <template #province="{ scopes }">
-                    {{ setAddressText(scopes.row) }}
-                </template>
-                <template #is_default="{ scopes }">
-                    <el-tag v-if="scopes.row.is_default" type="success" size="small">
-                        是
-                    </el-tag>
-                    <el-tag v-else type="info" size="small">
-                        否
-                    </el-tag>
-                </template>
-                <template #is_bill_address="{ scopes }">
-                    <el-tag v-if="scopes.row.is_bill_address" type="success" size="small">
-                        是
-                    </el-tag>
-                    <el-tag v-else type="info" size="small">
-                        否
-                    </el-tag>
-                </template>
-                <template #operate="{ scopes }">
-                    <el-button type="primary" link size="small" @click="onEdit(scopes.row)">
-                        修改
-                    </el-button>
-                    <el-button type="primary" link size="small" @click="onDel(scopes.row)">
-                        删除
-                    </el-button>
-                </template>
-            </CoTable>
-            <UserAddressModel ref="modelRef" @update="getAddress" />
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import { UserAddressModel } from '#components'
 
@@ -152,5 +92,65 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="pb20px">
+                    <el-skeleton-item class="w20%!" />
+                </div>
+                <div class="min-h500px">
+                    <el-skeleton :rows="5" />
+                </div>
+            </template>
+            <el-breadcrumb>
+                <el-breadcrumb-item>
+                    账户管理
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>
+                    地址管理
+                </el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="my15px">
+                <el-button type="primary" @click="onAdd">
+                    新增地址
+                </el-button>
+            </div>
+
+            <CoTable v-model:page="tableData.pagination" v-model:table-header="tableData.tableHeader" :data="tableData.data"
+                auto-height scrollbar-always-on border @update:page="onHandleCurrentChange">
+                <template #province="{ scopes }">
+                    {{ setAddressText(scopes.row) }}
+                </template>
+                <template #is_default="{ scopes }">
+                    <el-tag v-if="scopes.row.is_default" type="success" size="small">
+                        是
+                    </el-tag>
+                    <el-tag v-else type="info" size="small">
+                        否
+                    </el-tag>
+                </template>
+                <template #is_bill_address="{ scopes }">
+                    <el-tag v-if="scopes.row.is_bill_address" type="success" size="small">
+                        是
+                    </el-tag>
+                    <el-tag v-else type="info" size="small">
+                        否
+                    </el-tag>
+                </template>
+                <template #operate="{ scopes }">
+                    <el-button type="primary" link size="small" @click="onEdit(scopes.row)">
+                        修改
+                    </el-button>
+                    <el-button type="primary" link size="small" @click="onDel(scopes.row)">
+                        删除
+                    </el-button>
+                </template>
+            </CoTable>
+            <UserAddressModel ref="modelRef" @update="getAddress" />
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style scoped></style>

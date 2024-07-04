@@ -1,3 +1,9 @@
+<script setup lang="ts">
+// 获取商城信息
+const useSystem = useSystemState()
+const systemInfo = await useSystem.getSystemInfo()
+</script>
+
 <template>
     <div class="h100px bg-#313131">
         <div class="container">
@@ -7,12 +13,6 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-// 获取商城信息
-const useSystem = useSystemState()
-const systemInfo = await useSystem.getSystemInfo()
-</script>
 
 <style scoped>
 .login {

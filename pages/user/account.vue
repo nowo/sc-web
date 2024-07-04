@@ -1,114 +1,3 @@
-<template>
-    <LayoutUser>
-        <client-only>
-            <div h40px>
-                <el-breadcrumb>
-                    <el-breadcrumb-item>
-                        账户管理
-                    </el-breadcrumb-item>
-                    <el-breadcrumb-item>账户资料</el-breadcrumb-item>
-                </el-breadcrumb>
-            </div>
-            <!-- ***********个人信息*************************************** -->
-            <div v-if="defData.type === 1">
-                <div style="font-weight: bold">
-                    个人信息
-                </div>
-                <div style="margin:15px 0px;font-size: 14px;">
-                    头像： <el-image class="h100px w100px" :src="defData.headImgUrl" />
-                </div>
-                <div style="margin:15px 0px;font-size: 14px;">
-                    我的用户名：{{ defData.user_name }}
-                </div>
-                <el-button type="danger" ml20 mt5 @click="editClick">
-                    修改
-                </el-button>
-            </div>
-            <div v-else>
-                <p>修改信息</p>
-                <el-form ref="formRef" :model="form" label-width="130px" class="pt15px" :rules="rules">
-                    <el-row>
-                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                            <el-form-item prop="headimgurl" label="头像：">
-                                <CoUpload v-model="form.headImgUrl" />
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="20" :md="18" :lg="14" :xl="14">
-                            <el-form-item prop="user_name" label="我的用户名：">
-                                <el-input v-model="form.user_name" clearable />
-                            </el-form-item>
-                        </el-col>
-                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                            <el-form-item>
-                                <el-button type="primary" @click="onClick">
-                                    确定
-                                </el-button>
-                                <el-button @click="defData.type = 1">
-                                    返回
-                                </el-button>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                </el-form>
-            </div>
-            <!-- ***********账户安全**************************************** -->
-            <div class="safe mt40px">
-                <div>登录密码：联网账号存在被盗风险，建议定期更改密码以保护账户安全</div>
-                <div class="safe-click">
-                    <NuxtLink to="/user/components/editPwd">
-                        修改
-                    </NuxtLink>
-                </div>
-            </div>
-            <div class="safe">
-                <div>绑定手机：您已绑定手机：{{ defData.phone }}，若手机丢失或停用，请及时更换</div>
-                <div class="safe-click">
-                    <NuxtLink to="/user/components/editPhone">
-                        换绑
-                    </NuxtLink>
-                </div>
-            </div>
-            <div class="safe">
-                <div>绑定微信： {{ defData.nickname ? '已绑定' : '暂无绑定' }}{{ defData.nickname }}</div>
-                <div class="safe-click">
-                    <div v-if="defData.nickname" @click="delWeChat">
-                        解绑
-                    </div>
-                    <div v-else>
-                        <NuxtLink :to="weChat" @click="getWeChat">
-                            绑定
-                        </NuxtLink>
-                    </div>
-                </div>
-            </div>
-            <div class="safe">
-                <div>
-                    绑定邮箱：{{ defData.email ? '您已绑定邮箱' : '暂未绑定' }}{{ defData.email }}
-                    <el-button v-if="defData.email && defData.email_status === 0" :loading="form.loading"
-                        @click="sendEmail">
-                        去激活
-                    </el-button>
-                </div>
-                <div class="safe-click" @click="defData.visible = true">
-                    修改
-                </div>
-            </div>
-        </client-only>
-        <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden title="修改邮箱"
-            width="680px" @close="onClose" @cancel="onClose" @confirm="editPwd">
-            <el-form ref="formRef" label-width="130px" :rules="rules" :model="form" style="max-width: 500px">
-                <el-row>
-                    <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                        <el-form-item prop="email" label="邮箱">
-                            <el-input v-model="form.email" placeholder="请输入邮箱" />
-                        </el-form-item>
-                    </el-col>
-                </el-row>
-            </el-form>
-        </CoDialog>
-    </LayoutUser>
-</template>
-
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
 import { ref } from 'vue'
@@ -148,9 +37,10 @@ const form = reactive({
 const rules = reactive<FormRules>({
     user_name: [
         { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { min: 2, max: 16, message: '最少2个,最多16个字符', trigger: 'blur' }],
+        { min: 2, max: 16, message: '最少2个,最多16个字符', trigger: 'blur' },
+    ],
     email: [
-        { required: true, pattern: /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/, message: '填写正确的邮箱格式', trigger: 'blur' },
+        { required: true, pattern: /^([a-z0-9]+[_|.]?)*[a-z0-9]@([a-z0-9]+[_|.]?)*[a-z0-9]\.[a-z]{2,3}$/i, message: '填写正确的邮箱格式', trigger: 'blur' },
     ],
 })
 
@@ -262,8 +152,8 @@ const sendEmail = async () => {
 
 // 修改邮箱
 const editPwd = async () => {
-    const isRun = await formRef.value?.validate((valid, _fields) => !!valid)
-    if (!isRun) return
+    const isVerify = await useFormVerify(formRef.value)
+    if (!isVerify) return
     const data: AccountApi_editEmail = {
         email: form.email,
     }
@@ -289,6 +179,117 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <client-only>
+            <div h40px>
+                <el-breadcrumb>
+                    <el-breadcrumb-item>
+                        账户管理
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item>账户资料</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- ***********个人信息*************************************** -->
+            <div v-if="defData.type === 1">
+                <div style="font-weight: bold">
+                    个人信息
+                </div>
+                <div style="margin:15px 0px;font-size: 14px;">
+                    头像： <el-image class="h100px w100px" :src="defData.headImgUrl" />
+                </div>
+                <div style="margin:15px 0px;font-size: 14px;">
+                    我的用户名：{{ defData.user_name }}
+                </div>
+                <el-button type="danger" ml20 mt5 @click="editClick">
+                    修改
+                </el-button>
+            </div>
+            <div v-else>
+                <p>修改信息</p>
+                <el-form ref="formRef" :model="form" label-width="130px" class="pt15px" :rules="rules">
+                    <el-row>
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                            <el-form-item prop="headimgurl" label="头像：">
+                                <CoUpload v-model="form.headImgUrl" />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="20" :md="18" :lg="14" :xl="14">
+                            <el-form-item prop="user_name" label="我的用户名：">
+                                <el-input v-model="form.user_name" clearable />
+                            </el-form-item>
+                        </el-col>
+                        <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                            <el-form-item>
+                                <el-button type="primary" @click="onClick">
+                                    确定
+                                </el-button>
+                                <el-button @click="defData.type = 1">
+                                    返回
+                                </el-button>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </div>
+            <!-- ***********账户安全**************************************** -->
+            <div class="safe mt40px">
+                <div>登录密码：联网账号存在被盗风险，建议定期更改密码以保护账户安全</div>
+                <div class="safe-click">
+                    <NuxtLink to="/user/components/editPwd">
+                        修改
+                    </NuxtLink>
+                </div>
+            </div>
+            <div class="safe">
+                <div>绑定手机：您已绑定手机：{{ defData.phone }}，若手机丢失或停用，请及时更换</div>
+                <div class="safe-click">
+                    <NuxtLink to="/user/components/editPhone">
+                        换绑
+                    </NuxtLink>
+                </div>
+            </div>
+            <div class="safe">
+                <div>绑定微信： {{ defData.nickname ? '已绑定' : '暂无绑定' }}{{ defData.nickname }}</div>
+                <div class="safe-click">
+                    <div v-if="defData.nickname" @click="delWeChat">
+                        解绑
+                    </div>
+                    <div v-else>
+                        <NuxtLink :to="weChat" @click="getWeChat">
+                            绑定
+                        </NuxtLink>
+                    </div>
+                </div>
+            </div>
+            <div class="safe">
+                <div>
+                    绑定邮箱：{{ defData.email ? '您已绑定邮箱' : '暂未绑定' }}{{ defData.email }}
+                    <el-button v-if="defData.email && defData.email_status === 0" :loading="form.loading"
+                        @click="sendEmail">
+                        去激活
+                    </el-button>
+                </div>
+                <div class="safe-click" @click="defData.visible = true">
+                    修改
+                </div>
+            </div>
+        </client-only>
+        <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden title="修改邮箱"
+            width="680px" @close="onClose" @cancel="onClose" @confirm="editPwd">
+            <el-form ref="formRef" label-width="130px" :rules="rules" :model="form" style="max-width: 500px">
+                <el-row>
+                    <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                        <el-form-item prop="email" label="邮箱">
+                            <el-input v-model="form.email" placeholder="请输入邮箱" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+            </el-form>
+        </CoDialog>
+    </LayoutUser>
+</template>
 
 <style scoped>
 .avatar-upload.avatar-uploader .el-upload {

@@ -1,3 +1,19 @@
+<script setup lang="ts">
+const defData = reactive({
+    activeName: '1',
+    skeleton: true,
+})
+
+onMounted(() => {
+    defData.skeleton = false
+})
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <LayoutUser>
         <el-skeleton :loading="defData.skeleton" animated>
@@ -28,21 +44,5 @@
         </el-skeleton>
     </LayoutUser>
 </template>
-
-<script setup lang="ts">
-const defData = reactive({
-    activeName: '1',
-    skeleton: true,
-})
-
-onMounted(() => {
-    defData.skeleton = false
-})
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style scoped></style>

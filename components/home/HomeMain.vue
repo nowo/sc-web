@@ -1,3 +1,52 @@
+<script lang="ts" setup>
+import { HomeApi } from '~/api/home/home'
+
+interface TabActiveType {
+    [k: string]: string | number
+}
+
+const defData = reactive({
+    // active: {} as TabActiveType, // 楼层对应tab切换选中项
+    ready: false, // 楼层是否加载完成
+})
+
+const goodsBestRef = ref(null)
+const navVisible = useElementVisibility(goodsBestRef)
+
+const floorRef = ref(null)
+const floorVisible = useElementVisibility(floorRef)
+// const { x, y } = useWindowScroll()
+
+// 获取楼层
+const { data: floor } = await HomeApi.getFloor()
+const floorList = computed(() => floor.value?.data || [])
+
+const floorActive = computed(() => {
+    const active: TabActiveType = {}
+    floor.value?.data.forEach((item, index) => {
+        active[item.storey_id] = `${index}-0`
+    })
+    return active
+})
+
+// 新品商品
+const { data: goods } = await HomeApi.getNewGoods()
+
+// 只显示前五个（下标0开始，截取5个）
+const goodsList = computed(() => {
+    const list = goods.value?.data.lists.slice(0, 5).map((item) => {
+        item.goods_img = setGoodsOssImg(item.goods_img, 200)
+        return item
+    })
+    return list || []
+})
+
+onMounted(async () => {
+    await wait(1000)
+    defData.ready = true
+})
+</script>
+
 <template>
     <div class="container">
         <div ref="goodsBestRef" />
@@ -86,55 +135,6 @@
         </Transition>
     </div>
 </template>
-
-<script lang="ts" setup>
-import { HomeApi } from '~/api/home/home'
-
-interface TabActiveType {
-    [k: string]: string | number
-}
-
-const defData = reactive({
-    // active: {} as TabActiveType, // 楼层对应tab切换选中项
-    ready: false, // 楼层是否加载完成
-})
-
-const goodsBestRef = ref(null)
-const navVisible = useElementVisibility(goodsBestRef)
-
-const floorRef = ref(null)
-const floorVisible = useElementVisibility(floorRef)
-// const { x, y } = useWindowScroll()
-
-// 获取楼层
-const { data: floor } = await HomeApi.getFloor()
-const floorList = computed(() => floor.value?.data || [])
-
-const floorActive = computed(() => {
-    const active: TabActiveType = {}
-    floor.value?.data.forEach((item, index) => {
-        active[item.storey_id] = `${index}-0`
-    })
-    return active
-})
-
-// 新品商品
-const { data: goods } = await HomeApi.getNewGoods()
-
-// 只显示前五个（下标0开始，截取5个）
-const goodsList = computed(() => {
-    const list = goods.value?.data.lists.slice(0, 5).map((item) => {
-        item.goods_img = setGoodsOssImg(item.goods_img, 200)
-        return item
-    })
-    return list || []
-})
-
-onMounted(async () => {
-    await wait(1000)
-    defData.ready = true
-})
-</script>
 
 <style lang="scss" scoped>
 :global(html) {

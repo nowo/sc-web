@@ -1,215 +1,4 @@
 <!-- 新增、修改退货 -->
-<template>
-    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
-        width="800px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
-        <el-form ref="formRef" :model="form.data" :label-width="112" :rules="rules" class="form-box"
-            :label-position="defData.type === 1 ? 'top' : 'right'">
-            <el-row v-if="defData.type === 1">
-                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                    <!-- <el-form-item prop="order_no" label="订单编号:">
-                        <b>{{ form.data.order_no }}</b>
-                    </el-form-item> -->
-                    <div class="mb15px">
-                        订单编号: {{ form.data.order_no }}
-                    </div>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="invoice_id" label="发票选择:" label-width="auto">
-                        <el-radio-group v-model="form.data.invoice_id" class="w100%">
-                            <el-tabs v-model="defData.activeName" class="invoice-tabs" tab-position="left">
-                                <el-tab-pane v-for="(item, index) in invoiceData" :key="index" :label="INVOICE_DATA[index]"
-                                    :name="index" lazy>
-                                    <el-radio v-for="sub in item" :key="sub.bill_header_id" :label="sub.bill_header_id">
-                                        <span>抬头：{{ sub.header }}</span>
-                                        <span class="mx10px opacity90">email：{{ sub.enterprise_email }} </span>
-                                        <!-- <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em> -->
-                                    </el-radio>
-                                </el-tab-pane>
-                            </el-tabs>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="address_id" label="收票地址:">
-                        <el-radio-group v-model="form.data.address_id" class="address-radio">
-                            <el-radio v-for="item in defData.addressList" :key="item.address_id" :label="item.address_id">
-                                <span>{{ setAddressText(item) }}</span>
-                                <span class="mx5px opacity90">（{{ item.contacts }} 收）</span>
-                                <span class="mx5px">{{ item.phone }}</span>
-                                <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em>
-                            </el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row v-else-if="defData.type === 2">
-                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                    <el-form-item prop="order_no" label="订单编号:">
-                        <b>{{ form.data.order_no }}</b>
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                    <el-form-item prop="order_no" label="申请时间:">
-                        {{ billInfo?.add_time ? formatTime(billInfo?.add_time) : '--' }}
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="-mt10px">
-                    <el-form-item label="操作状态:">
-                        <el-tag type="success" size="large">
-                            {{ defData.operateList[billInfo?.verify_status || 0] }}
-                        </el-tag>
-                        <div v-if="billInfo?.failed_remark" class="ml10px">
-                            审核原因: {{ billInfo?.failed_remark }}
-                        </div>
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="enterprise_name" label="企业名称:">
-                        <el-input v-model="form.data.enterprise_name" placeholder="请输入企业名称" maxlength="40" clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="enterprise_email" label="企业邮箱:">
-                        <el-input v-model="form.data.enterprise_email" type="email" placeholder="请输入企业邮箱" maxlength="40"
-                            clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="type" label="发票类型:">
-                        <el-radio-group v-model="form.data.type">
-                            <el-radio v-for="(item, index) in INVOICE_DATA" :key="index" :label="Number(index)" border>
-                                {{ item }}
-                            </el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="tax_no" label="纳税人识别号:">
-                        <el-input v-model="form.data.tax_no" placeholder="请输入纳税人识别号" clearable />
-                    </el-form-item>
-                </el-col>
-                <template v-if="form.data.type === 1">
-                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item prop="logon_tel" label="注册电话:">
-                            <el-input v-model="form.data.logon_tel" placeholder="请输入注册电话" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item prop="logon_addr" label="注册地址:">
-                            <el-input v-model="form.data.logon_addr" placeholder="请输入注册地址" maxlength="100" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item prop="bank" label="开户银行:">
-                            <el-input v-model="form.data.bank" placeholder="请输入开户银行" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item prop="bank_account" label="开户账号:">
-                            <el-input v-model="form.data.bank_account" placeholder="请输入开户账号" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                </template>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="address_id" label="收票地址:">
-                        <el-radio-group v-model="form.data.address_id" class="address-radio">
-                            <el-radio v-for="item in defData.addressList" :key="item.address_id" :label="item.address_id">
-                                <span>{{ setAddressText(item) }}</span>
-                                <span class="mx5px opacity90">（{{ item.contacts }} 收）</span>
-                                <span class="mx5px">{{ item.phone }}</span>
-                                <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em>
-                            </el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-            <el-row v-else-if="defData.type === 3">
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item label="操作状态:">
-                        <el-tag type="success" size="large">
-                            {{ defData.operateList[billInfo?.verify_status || 0] }}
-                        </el-tag>
-                        <div v-if="billInfo?.failed_remark && billInfo?.verify_status === 2" class="ml10px">
-                            审核原因: {{ billInfo?.failed_remark }}
-                        </div>
-                    </el-form-item>
-                    <el-descriptions title="" :column="2" border>
-                        <el-descriptions-item label="订单编号:" label-class-name="lab-wid">
-                            {{ billInfo?.order_no }}
-                        </el-descriptions-item>
-                        <!-- <el-descriptions-item label="审核状态:">
-                            <el-tag v-if="billInfo?.verify_status === 1">审核通过</el-tag>
-                            <el-tag v-else-if="billInfo?.verify_status === 2" type="info">审核不通过</el-tag>
-                            <el-tag v-else type="" effect="plain">未审核</el-tag>
-                        </el-descriptions-item>
-                        <el-descriptions-item label="原因:">{{ billInfo?.failed_remark }}</el-descriptions-item> -->
-                        <el-descriptions-item label="申请时间:">
-                            {{ billInfo?.add_time ? formatTime(billInfo?.add_time) : '--' }}
-                        </el-descriptions-item>
-                        <!-- <el-descriptions-item label="审核时间:">
-                            {{ billInfo?.check_time ? formatTime(billInfo?.check_time)
-                                : '--'
-                            }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="审核人员:">
-                            {{ billInfo?.realname }}
-                        </el-descriptions-item> -->
-                        <el-descriptions-item label="联系人:" label-class-name="lab-wid">
-                            {{ billInfo?.bill_address.contacts }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="联系方式:" label-class-name="lab-wid">
-                            {{ billInfo?.bill_address.phone }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="收货地址:" :span="2">
-                            {{ fullAddress }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="物流公司:" label-class-name="lab-wid">
-                            {{ billInfo?.express_name }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="物流单号:" label-class-name="lab-wid">
-                            {{ billInfo?.express_no }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="" :span="2">
-                            <div class="pt10px">
-                                <!--  -->
-                            </div>
-                        </el-descriptions-item>
-                        <el-descriptions-item label="发票抬头:" label-class-name="lab-wid">
-                            {{ billInfo?.header }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="电子邮箱:" label-class-name="lab-wid">
-                            {{ billInfo?.enterprise_email }}
-                        </el-descriptions-item>
-                        <el-descriptions-item label="开票类型:">
-                            <el-tag :type="billInfo?.type === 1 ? 'danger' : billInfo?.type === 2 ? 'success' : 'warning'">
-                                {{ INVOICE_DATA[billInfo?.type as 1] }}
-                            </el-tag>
-                        </el-descriptions-item>
-                        <el-descriptions-item label="纳税人识别号:">
-                            {{ billInfo?.tax_no }}
-                        </el-descriptions-item>
-                        <template v-if="billInfo?.type === 1">
-                            <el-descriptions-item label="注册电话:">
-                                {{ billInfo?.logon_tel }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="注册地址:">
-                                {{ billInfo?.logon_addr }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="开户银行:">
-                                {{ billInfo?.bank }}
-                            </el-descriptions-item>
-                            <el-descriptions-item label="开户账号:">
-                                {{ billInfo?.bank_account }}
-                            </el-descriptions-item>
-                        </template>
-                    </el-descriptions>
-                </el-col>
-            </el-row>
-        </el-form>
-    </CoDialog>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 import { UserInvoiceApi } from '~/api/user/invoice'
@@ -218,7 +7,7 @@ import { OrderInvoiceApi } from '~/api/goods/order'
 
 const emits = defineEmits<{
     // (event: 'update'): void
-    'update': []
+    update: []
 }>()
 const formRef = ref<FormInstance>()
 const billInfo = ref<OrderInvoiceApi_GetListItem>()
@@ -495,6 +284,217 @@ defineExpose({
     onOpenDialog,
 })
 </script>
+
+<template>
+    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
+        width="800px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
+        <el-form ref="formRef" :model="form.data" :label-width="112" :rules="rules" class="form-box"
+            :label-position="defData.type === 1 ? 'top' : 'right'">
+            <el-row v-if="defData.type === 1">
+                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                    <!-- <el-form-item prop="order_no" label="订单编号:">
+                        <b>{{ form.data.order_no }}</b>
+                    </el-form-item> -->
+                    <div class="mb15px">
+                        订单编号: {{ form.data.order_no }}
+                    </div>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="invoice_id" label="发票选择:" label-width="auto">
+                        <el-radio-group v-model="form.data.invoice_id" class="w100%">
+                            <el-tabs v-model="defData.activeName" class="invoice-tabs" tab-position="left">
+                                <el-tab-pane v-for="(item, index) in invoiceData" :key="index" :label="INVOICE_DATA[index]"
+                                    :name="index" lazy>
+                                    <el-radio v-for="sub in item" :key="sub.bill_header_id" :label="sub.bill_header_id">
+                                        <span>抬头：{{ sub.header }}</span>
+                                        <span class="mx10px opacity90">email：{{ sub.enterprise_email }} </span>
+                                        <!-- <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em> -->
+                                    </el-radio>
+                                </el-tab-pane>
+                            </el-tabs>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="address_id" label="收票地址:">
+                        <el-radio-group v-model="form.data.address_id" class="address-radio">
+                            <el-radio v-for="item in defData.addressList" :key="item.address_id" :label="item.address_id">
+                                <span>{{ setAddressText(item) }}</span>
+                                <span class="mx5px opacity90">（{{ item.contacts }} 收）</span>
+                                <span class="mx5px">{{ item.phone }}</span>
+                                <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em>
+                            </el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-else-if="defData.type === 2">
+                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                    <el-form-item prop="order_no" label="订单编号:">
+                        <b>{{ form.data.order_no }}</b>
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                    <el-form-item prop="order_no" label="申请时间:">
+                        {{ billInfo?.add_time ? formatTime(billInfo?.add_time) : '--' }}
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="-mt10px">
+                    <el-form-item label="操作状态:">
+                        <el-tag type="success" size="large">
+                            {{ defData.operateList[billInfo?.verify_status || 0] }}
+                        </el-tag>
+                        <div v-if="billInfo?.failed_remark" class="ml10px">
+                            审核原因: {{ billInfo?.failed_remark }}
+                        </div>
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="enterprise_name" label="企业名称:">
+                        <el-input v-model="form.data.enterprise_name" placeholder="请输入企业名称" maxlength="40" clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="enterprise_email" label="企业邮箱:">
+                        <el-input v-model="form.data.enterprise_email" type="email" placeholder="请输入企业邮箱" maxlength="40"
+                            clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="type" label="发票类型:">
+                        <el-radio-group v-model="form.data.type">
+                            <el-radio v-for="(item, index) in INVOICE_DATA" :key="index" :label="Number(index)" border>
+                                {{ item }}
+                            </el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="tax_no" label="纳税人识别号:">
+                        <el-input v-model="form.data.tax_no" placeholder="请输入纳税人识别号" clearable />
+                    </el-form-item>
+                </el-col>
+                <template v-if="form.data.type === 1">
+                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-form-item prop="logon_tel" label="注册电话:">
+                            <el-input v-model="form.data.logon_tel" placeholder="请输入注册电话" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-form-item prop="logon_addr" label="注册地址:">
+                            <el-input v-model="form.data.logon_addr" placeholder="请输入注册地址" maxlength="100" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-form-item prop="bank" label="开户银行:">
+                            <el-input v-model="form.data.bank" placeholder="请输入开户银行" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="12" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-form-item prop="bank_account" label="开户账号:">
+                            <el-input v-model="form.data.bank_account" placeholder="请输入开户账号" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                </template>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="address_id" label="收票地址:">
+                        <el-radio-group v-model="form.data.address_id" class="address-radio">
+                            <el-radio v-for="item in defData.addressList" :key="item.address_id" :label="item.address_id">
+                                <span>{{ setAddressText(item) }}</span>
+                                <span class="mx5px opacity90">（{{ item.contacts }} 收）</span>
+                                <span class="mx5px">{{ item.phone }}</span>
+                                <em v-if="item.is_default" class="mx5px fw400 opacity70">默认地址</em>
+                            </el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row v-else-if="defData.type === 3">
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item label="操作状态:">
+                        <el-tag type="success" size="large">
+                            {{ defData.operateList[billInfo?.verify_status || 0] }}
+                        </el-tag>
+                        <div v-if="billInfo?.failed_remark && billInfo?.verify_status === 2" class="ml10px">
+                            审核原因: {{ billInfo?.failed_remark }}
+                        </div>
+                    </el-form-item>
+                    <el-descriptions title="" :column="2" border>
+                        <el-descriptions-item label="订单编号:" label-class-name="lab-wid">
+                            {{ billInfo?.order_no }}
+                        </el-descriptions-item>
+                        <!-- <el-descriptions-item label="审核状态:">
+                            <el-tag v-if="billInfo?.verify_status === 1">审核通过</el-tag>
+                            <el-tag v-else-if="billInfo?.verify_status === 2" type="info">审核不通过</el-tag>
+                            <el-tag v-else type="" effect="plain">未审核</el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="原因:">{{ billInfo?.failed_remark }}</el-descriptions-item> -->
+                        <el-descriptions-item label="申请时间:">
+                            {{ billInfo?.add_time ? formatTime(billInfo?.add_time) : '--' }}
+                        </el-descriptions-item>
+                        <!-- <el-descriptions-item label="审核时间:">
+                            {{ billInfo?.check_time ? formatTime(billInfo?.check_time)
+                                : '--'
+                            }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="审核人员:">
+                            {{ billInfo?.realname }}
+                        </el-descriptions-item> -->
+                        <el-descriptions-item label="联系人:" label-class-name="lab-wid">
+                            {{ billInfo?.bill_address.contacts }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="联系方式:" label-class-name="lab-wid">
+                            {{ billInfo?.bill_address.phone }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="收货地址:" :span="2">
+                            {{ fullAddress }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="物流公司:" label-class-name="lab-wid">
+                            {{ billInfo?.express_name }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="物流单号:" label-class-name="lab-wid">
+                            {{ billInfo?.express_no }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="" :span="2">
+                            <div class="pt10px">
+                                <!--  -->
+                            </div>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="发票抬头:" label-class-name="lab-wid">
+                            {{ billInfo?.header }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="电子邮箱:" label-class-name="lab-wid">
+                            {{ billInfo?.enterprise_email }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="开票类型:">
+                            <el-tag :type="billInfo?.type === 1 ? 'danger' : billInfo?.type === 2 ? 'success' : 'warning'">
+                                {{ INVOICE_DATA[billInfo?.type as 1] }}
+                            </el-tag>
+                        </el-descriptions-item>
+                        <el-descriptions-item label="纳税人识别号:">
+                            {{ billInfo?.tax_no }}
+                        </el-descriptions-item>
+                        <template v-if="billInfo?.type === 1">
+                            <el-descriptions-item label="注册电话:">
+                                {{ billInfo?.logon_tel }}
+                            </el-descriptions-item>
+                            <el-descriptions-item label="注册地址:">
+                                {{ billInfo?.logon_addr }}
+                            </el-descriptions-item>
+                            <el-descriptions-item label="开户银行:">
+                                {{ billInfo?.bank }}
+                            </el-descriptions-item>
+                            <el-descriptions-item label="开户账号:">
+                                {{ billInfo?.bank_account }}
+                            </el-descriptions-item>
+                        </template>
+                    </el-descriptions>
+                </el-col>
+            </el-row>
+        </el-form>
+    </CoDialog>
+</template>
 
 <style lang="scss" scoped>
 .invoice-tabs,

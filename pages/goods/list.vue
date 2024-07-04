@@ -1,3 +1,236 @@
+<script setup lang="ts">
+import { useApiServer } from '~/api/server'
+import { GoodsApi } from '~/api/goods/list'
+import { RecordApi } from '~/api/user/record'
+
+definePageMeta({
+    layout: 'home',
+})
+
+const userState = useUserState() // 用户信息
+const useCartNumber = useCartNumberState() // 购物车商品数量
+const { x, y } = useMouse() // 鼠标位置函数用于获取当前鼠标位置
+
+const keyword = useRouteQuery('keyword') // 搜索
+const cid = useRouteQuery('cid') // 分类
+const bid = useRouteQuery('bid') // 品牌
+
+const defData = reactive({
+    // ready: false,
+    skeleton: true, // 默认显示骨架屏
+    isList: false, // 商品显示列表，还是网格
+    breadcrumbList: [] as GoodsApi_GetListItemCate[], // 面包屑导航
+    classList: [] as GoodsApi_GetListItemCate[], // 商品分类
+    brandList: [] as GoodsApi_GetListItemBrand[], // 商品品牌
+    tableData: [] as GoodsApi_GetListItem[], // 商品列表
+    showClass: false, // 显示所有分类
+    showBrand: false, // 显示所有品牌
+    optChose: 1, // 1:默认选中状态，2：销量，3：价格
+})
+
+const form = reactive({
+    cate_id: [],
+    brand_id: [],
+    price_sort: '', // 价格排序方式   'desc' | 'asc'
+    is_stock: false, // 是否有库存
+    min_price: '', // 最低价
+    max_price: '', // 最高价
+
+    page: 1,
+    pageSize: 60,
+    pageSizes: [60, 120, 150],
+    total: 0,
+
+})
+
+// 取得品牌名称
+const brandName = computed(() => {
+    if (!bid.value) return ''
+    const brand = defData.brandList.find(item => item.brand_id === Number(bid.value))
+    return brand?.brand_name || '' // 品牌名称
+})
+
+// 获取初始数据
+const initTableData = async () => {
+    // 滚动条回到顶部(web端调用)
+    if (import.meta.client) {
+        if (document) document.documentElement.scrollTop = 0
+    }
+
+    const params: GoodsApi_GetList = {
+        is_paging: 1,
+        page: form.page,
+        page_size: form.pageSize,
+        keyword: keyword.value?.trim() ?? '', // 关键词或名称匹配的商品列表匹配到这个字符串中的任何一个
+        cat_id: Number(cid.value),
+        brand_id: Number(bid.value), // 品牌id
+    }
+
+    if (!params.keyword) delete params.keyword
+    if (!params.cat_id) delete params.cat_id
+    if (!params.brand_id) delete params.brand_id
+
+    // 销量排序 （desc或asc）
+    if (defData.optChose === 2) params.sale_number = 'desc'
+    // 价格排序 （desc或asc）
+    if (defData.optChose === 3) {
+        params.shop_price = form.price_sort === 'desc' ? 'desc' : 'asc'
+    }
+
+    // 价格范围
+    let price_range = ''
+    if (form.min_price || form.max_price) {
+        if (form.min_price && form.max_price) {
+            price_range = `${form.min_price}-${form.max_price}`
+        } else if (form.min_price) {
+            price_range = `${form.min_price}-${10 ** 8}`
+        } else if (form.max_price) {
+            price_range = `0-${form.max_price}`
+        }
+    }
+    if (price_range) params.price_interval = price_range // 价格范围-范围/范围/总价格/价格范围/
+
+    if (form.is_stock) params.goods_number = 1
+
+    // console.log('params :>> ', params)
+    const loading = useElLoading()
+
+    const { data } = await useApiServer.getGoodsList(params)
+
+    loading?.close()
+    const dat = data.value!.data
+    defData.breadcrumbList = dat.category.position
+    defData.classList = dat.category.lists
+    defData.brandList = dat.brand
+
+    defData.tableData = dat.goods.lists.map((item) => {
+        item.goods_img = setGoodsOssImg(item.goods_img, 300)
+        return item
+    }) || []
+    form.total = dat.goods.total || 0
+
+    defData.skeleton = false // 关闭骨架屏
+}
+
+// 切换商品显示列表
+const toggleShowList = (param: boolean) => {
+    if (defData.isList === param) return
+    defData.isList = param
+}
+
+// 商品分类展开、收起
+const toggleClass = () => {
+    defData.showClass = !defData.showClass
+}
+// 商品分类展开、收起
+const toggleBrand = () => {
+    defData.showBrand = !defData.showBrand
+}
+
+// 商品分类选中
+const onChoseClass = (id: number) => {
+    linkGoodsList({ query: { cid: id }, relate: true })
+}
+// 商品品牌选中
+const onChoseBrand = (id: number) => {
+    // 品牌已选中时，清空选中状态
+    const brand_id = id === Number(bid.value) ? '' : id
+    linkGoodsList({ query: { bid: brand_id }, relate: true })
+}
+
+// 分页数量点击
+const onHandleSizeChange = () => {
+    initTableData()
+}
+
+// 选择销量、价格排序、库存等
+const onChoseOpt = (type: number) => {
+    if (type === 3) { // 价格排序
+        if (defData.optChose === type) {
+            form.price_sort = form.price_sort === 'asc' ? 'desc' : 'asc'
+        }
+        if (!form.price_sort) form.price_sort = 'asc'
+    }
+
+    defData.optChose = type
+
+    nextTick(() => {
+        initTableData()
+    })
+}
+
+// 有无库存
+const onStockChange = () => {
+    initTableData()
+}
+
+// 价格范围
+const onPriceRange = () => {
+    initTableData()
+}
+
+// 商品收藏
+const onAddCollect = async (row: GoodsApi_GetListItem) => {
+    // 用户未登录时
+    if (!userState.token.value) {
+        return navigateTo('/login')
+    }
+    // 已经收藏了，取消收藏状态
+    if (row.is_collect) {
+        // 清除收藏
+        const params: RecordApi_Del = {
+            goods_ids: row.goods_id.toString(),
+            type: 1,
+        }
+        const { data } = await RecordApi.del(params)
+        if (data.value?.code === 200) {
+            row.is_collect = 0 // 清除收藏标志位
+        }
+    } else {
+        const params: RecordApi_Add = {
+            goods_id: row.goods_id,
+            type: 1,
+        }
+        const { data } = await RecordApi.add(params)
+        if (data.value?.code === 200) {
+            row.is_collect = 1
+        }
+    }
+}
+
+// 加入购物车
+const onAddCart = async (row: GoodsApi_GetListItem) => {
+    // 用户未登录时，不允许加入购物车页面
+    if (!userState.token.value) {
+        // ElMessage.error('请先登录!')
+        return navigateTo('/login')
+    }
+    const price = row.shop_price || ''
+    if (Number(price) <= 0) {
+        return ElMessage.error('商品价格不正确')
+    }
+
+    const number = 1 // 默认加1购物车条目
+    const { data } = await GoodsApi.addCart({ goods_id: row.goods_id, goods_number: number })
+    if (data.value?.code === 200) {
+        useCartNumber.setCartNumber() // 更新购物车商品数量
+        ElMessage.success('加入购物车成功')
+
+        // 设置动画
+        useCartNumber.setShopAnimate({ top: y.value, left: x.value })
+    } else {
+        ElMessage.error(data.value?.msg || '加入购物车失败')
+    }
+}
+
+initTableData()
+
+watch(() => [keyword.value, cid.value, bid.value], () => {
+    // if (!keyword.value && !cid.value && !bid.value) return
+    initTableData()
+})
+</script>
+
 <template>
     <section class="text-14px">
         <div class="container">
@@ -328,239 +561,6 @@
         </div>
     </section>
 </template>
-
-<script setup lang="ts">
-import { useApiServer } from '~/api/server'
-import { GoodsApi } from '~/api/goods/list'
-import { RecordApi } from '~/api/user/record'
-
-definePageMeta({
-    layout: 'home',
-})
-
-const userState = useUserState() // 用户信息
-const useCartNumber = useCartNumberState() // 购物车商品数量
-const { x, y } = useMouse() // 鼠标位置函数用于获取当前鼠标位置
-
-const keyword = useRouteQuery('keyword') // 搜索
-const cid = useRouteQuery('cid') // 分类
-const bid = useRouteQuery('bid') // 品牌
-
-const defData = reactive({
-    // ready: false,
-    skeleton: true, // 默认显示骨架屏
-    isList: false, // 商品显示列表，还是网格
-    breadcrumbList: [] as GoodsApi_GetListItemCate[], // 面包屑导航
-    classList: [] as GoodsApi_GetListItemCate[], // 商品分类
-    brandList: [] as GoodsApi_GetListItemBrand[], // 商品品牌
-    tableData: [] as GoodsApi_GetListItem[], // 商品列表
-    showClass: false, // 显示所有分类
-    showBrand: false, // 显示所有品牌
-    optChose: 1, // 1:默认选中状态，2：销量，3：价格
-})
-
-const form = reactive({
-    cate_id: [],
-    brand_id: [],
-    price_sort: '', // 价格排序方式   'desc' | 'asc'
-    is_stock: false, // 是否有库存
-    min_price: '', // 最低价
-    max_price: '', // 最高价
-
-    page: 1,
-    pageSize: 60,
-    pageSizes: [60, 120, 150],
-    total: 0,
-
-})
-
-// 取得品牌名称
-const brandName = computed(() => {
-    if (!bid.value) return ''
-    const brand = defData.brandList.find(item => item.brand_id === Number(bid.value))
-    return brand?.brand_name || '' // 品牌名称
-})
-
-// 获取初始数据
-const initTableData = async () => {
-    // 滚动条回到顶部(web端调用)
-    if (process.client) {
-        if (document) document.documentElement.scrollTop = 0
-    }
-
-    const params: GoodsApi_GetList = {
-        is_paging: 1,
-        page: form.page,
-        page_size: form.pageSize,
-        keyword: keyword.value?.trim() ?? '', // 关键词或名称匹配的商品列表匹配到这个字符串中的任何一个
-        cat_id: Number(cid.value),
-        brand_id: Number(bid.value), // 品牌id
-    }
-
-    if (!params.keyword) delete params.keyword
-    if (!params.cat_id) delete params.cat_id
-    if (!params.brand_id) delete params.brand_id
-
-    // 销量排序 （desc或asc）
-    if (defData.optChose === 2) params.sale_number = 'desc'
-    // 价格排序 （desc或asc）
-    if (defData.optChose === 3) {
-        params.shop_price = form.price_sort === 'desc' ? 'desc' : 'asc'
-    }
-
-    // 价格范围
-    let price_range = ''
-    if (form.min_price || form.max_price) {
-        if (form.min_price && form.max_price) {
-            price_range = `${form.min_price}-${form.max_price}`
-        } else if (form.min_price) {
-            price_range = `${form.min_price}-${10 ** 8}`
-        } else if (form.max_price) {
-            price_range = `0-${form.max_price}`
-        }
-    }
-    if (price_range) params.price_interval = price_range // 价格范围-范围/范围/总价格/价格范围/
-
-    if (form.is_stock) params.goods_number = 1
-
-    // console.log('params :>> ', params)
-    const loading = useElLoading()
-
-    const { data } = await useApiServer.getGoodsList(params)
-
-    loading?.close()
-    const dat = data.value!.data
-    defData.breadcrumbList = dat.category.position
-    defData.classList = dat.category.lists
-    defData.brandList = dat.brand
-
-    defData.tableData = dat.goods.lists.map((item) => {
-        item.goods_img = setGoodsOssImg(item.goods_img, 300)
-        return item
-    }) || []
-    form.total = dat.goods.total || 0
-
-    defData.skeleton = false // 关闭骨架屏
-}
-
-// 切换商品显示列表
-const toggleShowList = (param: boolean) => {
-    if (defData.isList === param) return
-    defData.isList = param
-}
-
-// 商品分类展开、收起
-const toggleClass = () => {
-    defData.showClass = !defData.showClass
-}
-// 商品分类展开、收起
-const toggleBrand = () => {
-    defData.showBrand = !defData.showBrand
-}
-
-// 商品分类选中
-const onChoseClass = (id: number) => {
-    linkGoodsList({ query: { cid: id }, relate: true })
-}
-// 商品品牌选中
-const onChoseBrand = (id: number) => {
-    // 品牌已选中时，清空选中状态
-    const brand_id = id === Number(bid.value) ? '' : id
-    linkGoodsList({ query: { bid: brand_id }, relate: true })
-}
-
-// 分页数量点击
-const onHandleSizeChange = () => {
-    initTableData()
-}
-
-// 选择销量、价格排序、库存等
-const onChoseOpt = (type: number) => {
-    if (type === 3) { // 价格排序
-        if (defData.optChose === type) {
-            form.price_sort = form.price_sort === 'asc' ? 'desc' : 'asc'
-        }
-        if (!form.price_sort) form.price_sort = 'asc'
-    }
-
-    defData.optChose = type
-
-    nextTick(() => {
-        initTableData()
-    })
-}
-
-// 有无库存
-const onStockChange = () => {
-    initTableData()
-}
-
-// 价格范围
-const onPriceRange = () => {
-    initTableData()
-}
-
-// 商品收藏
-const onAddCollect = async (row: GoodsApi_GetListItem) => {
-    // 用户未登录时
-    if (!userState.token.value) {
-        return navigateTo('/login')
-    }
-    // 已经收藏了，取消收藏状态
-    if (row.is_collect) {
-        // 清除收藏
-        const params: RecordApi_Del = {
-            goods_ids: row.goods_id.toString(),
-            type: 1,
-        }
-        const { data } = await RecordApi.del(params)
-        if (data.value?.code === 200) {
-            row.is_collect = 0 // 清除收藏标志位
-        }
-    } else {
-        const params: RecordApi_Add = {
-            goods_id: row.goods_id,
-            type: 1,
-        }
-        const { data } = await RecordApi.add(params)
-        if (data.value?.code === 200) {
-            row.is_collect = 1
-        }
-    }
-}
-
-// 加入购物车
-const onAddCart = async (row: GoodsApi_GetListItem) => {
-    // 用户未登录时，不允许加入购物车页面
-    if (!userState.token.value) {
-        // ElMessage.error('请先登录!')
-        return navigateTo('/login')
-    }
-    const price = row.shop_price || ''
-    if (Number(price) <= 0) {
-        return ElMessage.error('商品价格不正确')
-    }
-
-    const number = 1 // 默认加1购物车条目
-    const { data } = await GoodsApi.addCart({ goods_id: row.goods_id, goods_number: number })
-    if (data.value?.code === 200) {
-        useCartNumber.setCartNumber() // 更新购物车商品数量
-        ElMessage.success('加入购物车成功')
-
-        // 设置动画
-        useCartNumber.setShopAnimate({ top: y.value, left: x.value })
-    } else {
-        ElMessage.error(data.value?.msg || '加入购物车失败')
-    }
-}
-
-initTableData()
-
-watch(() => [keyword.value, cid.value, bid.value], () => {
-    // if (!keyword.value && !cid.value && !bid.value) return
-    initTableData()
-})
-</script>
 
 <style scoped lang="scss">
 .goods-breadcrumb {

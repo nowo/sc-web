@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { GoodsApi } from '~/api/goods/list'
+
+definePageMeta({
+    layout: 'home',
+})
+
+const defData = reactive({
+    skeleton: true, // 骨架屏
+    page: 1,
+    pageSize: 24,
+    total: 0,
+    cateList: [] as GoodsApi_GetClass[],
+})
+
+// 商品分类
+const { data, error } = await GoodsApi.getClass()
+if (!error.value && data.value?.code === 200) {
+    defData.skeleton = false
+    defData.cateList = data.value.data
+}
+
+// 跳转至商品列表的地址
+const onGoodsLink = (id: number) => {
+    return `/goods/list?cid=${id}`
+}
+</script>
+
 <template>
     <div class="container">
         <div class="cat-box min-h500px">
@@ -27,34 +55,6 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-import { GoodsApi } from '~/api/goods/list'
-
-definePageMeta({
-    layout: 'home',
-})
-
-const defData = reactive({
-    skeleton: true, // 骨架屏
-    page: 1,
-    pageSize: 24,
-    total: 0,
-    cateList: [] as GoodsApi_GetClass[],
-})
-
-// 商品分类
-const { data, error } = await GoodsApi.getClass()
-if (!error.value && data.value?.code === 200) {
-    defData.skeleton = false
-    defData.cateList = data.value.data
-}
-
-// 跳转至商品列表的地址
-const onGoodsLink = (id: number) => {
-    return `/goods/list?cid=${id}`
-}
-</script>
 
 <style lang="scss" scoped>
 .cat-box {

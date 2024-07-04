@@ -1,7 +1,3 @@
-<template>
-    <BaseClose v-if="systemStatus.is_close" />
-</template>
-
 <script setup lang="ts">
 const { systemStatus } = useSystemState()
 if (!systemStatus.value.is_close) {
@@ -11,3 +7,7 @@ if (!systemStatus.value.is_close) {
     })
 }
 </script>
+
+<template>
+    <BaseClose v-if="systemStatus.is_close" />
+</template>

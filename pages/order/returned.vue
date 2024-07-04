@@ -1,189 +1,4 @@
 <!-- 订单详情页面 -->
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="pb15px">
-                    <el-skeleton-item class="w20%!" />
-                </div>
-                <div class="mb20px border-1 p20px">
-                    <el-skeleton />
-                </div>
-                <div class="mb20px border-1 p20px">
-                    <el-skeleton />
-                </div>
-                <div class="min-h300px border-1 p20px">
-                    <el-skeleton />
-                </div>
-            </template>
-            <el-breadcrumb class="mb20px">
-                <el-breadcrumb-item v-for="item in breadcrumbData" :key="item.id" :to="item.href">
-                    {{ item.text }}
-                </el-breadcrumb-item>
-            </el-breadcrumb>
-            <div class="order-top mb20px border-1 p20px">
-                <div class="lt">
-                    <span class="mr20px">订单号：<b>{{ returnData?.main_order_no }}</b></span>
-                    <span class="mr20px">退换单号：<b>{{ return_no }}</b></span>
-                    <div class="mt10px">
-                        退换状态：<el-tag type="success" size="large">
-                            {{ defData.operateList[returnData?.status || 0] }}
-                        </el-tag>
-                    </div>
-                </div>
-                <div class="gt">
-                    <!--  -->
-                </div>
-
-                <div class="bane-item">
-                    <lazy-el-steps class="step-box" :active="stepSelect" finish-status="success">
-                        <el-step v-for="(item, index) in orderInfo?.flow_path" :key="index" :title="item.title"
-                            :description="item.item" />
-                    </lazy-el-steps>
-                </div>
-            </div>
-            <div class="mb20px border-1 p20px">
-                <div class="tle mb10px text-15px font-600 c-#222">
-                    退换信息
-                </div>
-                <ul class="collect-item">
-                    <!-- 下单时间：2023-05-30 13:18:38
-                <li>
-                    <div class="lt">
-                        下单时间：
-                    </div>
-                    <div class="gt">
-                        {{ orderInfo?.cerate_time }}
-                    </div>
-                </li> -->
-
-                    <li>
-                        <div class="lt">
-                            服务类型:
-                        </div>
-                        <div class="gt">
-                            <span class="mr-5px">{{ returnData?.is_all ? '全部' : '部分' }}</span>
-                            <el-tag v-if="returnData?.type === 1" type="info" size="small">
-                                退货/退款
-                            </el-tag>
-                            <el-tag v-else type="warning" size="small">
-                                换货
-                            </el-tag>
-                            <span v-if="returnData?.type === 1" class="ml20px">退款金额：<span class="color-primary">{{
-                                returnData?.meet_money }}</span></span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            退换理由:
-                        </div>
-                        <div class="gt">
-                            {{ returnData?.reason_name }}
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            问题描述:
-                        </div>
-                        <div class="gt">
-                            {{ returnData?.describe }}
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            物流公司:
-                        </div>
-                        <div class="gt">
-                            {{ returnData?.logistics_cusmoer || '--' }}
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            物流单号:
-                        </div>
-                        <div class="gt">
-                            {{ returnData?.logistics_no || '--' }}
-                        </div>
-                    </li>
-                    <el-form v-if="returnData?.status === 2 || returnData?.status === 3 || returnData?.status === 4"
-                        ref="formRef" :model="form.data" :label-width="100" :rules="rules">
-                        <el-row class="mt15px">
-                            <el-col :xs="18" :sm="18" :md="18" :lg="16" :xl="16">
-                                <el-form-item prop="describe" label="问题补充:">
-                                    <el-input v-model="form.data.describe" type="textarea" resize="none" :rows="3"
-                                        maxlength="80" clearable show-word-limit />
-                                </el-form-item>
-                                <template v-if="form.data.type === 2">
-                                    <el-form-item prop="logistics_name" label="物流公司:">
-                                        <el-input v-model="form.data.logistics_name" maxlength="30" clearable />
-                                    </el-form-item>
-                                    <el-form-item prop="logistics_no" label="物流单号:">
-                                        <el-input v-model="form.data.logistics_no" clearable />
-                                    </el-form-item>
-                                </template>
-                                <el-form-item label="">
-                                    <el-button type="primary" @click="onSubmit">
-                                        确定提交
-                                    </el-button>
-                                </el-form-item>
-                            </el-col>
-                            <el-col :xs="6" :sm="6" :md="6" :lg="8" :xl="8">
-                                <el-form-item prop="img" label="图片:">
-                                    <CoUpload v-model="form.data.img" />
-                                </el-form-item>
-                            </el-col>
-                        </el-row>
-                    </el-form>
-                </ul>
-            </div>
-            <div class="mb20px border-1 p20px">
-                <div class="tle mb10px text-15px font-600 c-#222">
-                    退换商品
-                </div>
-                <el-table :data="orderInfo?.goods_list" class="return-table" border>
-                    <el-table-column label="商品信息" min-width="160" property="goods_name">
-                        <template #default="{ row }">
-                            <div class="flex items-center">
-                                <CoImage class="h45px w45px" :src="setGoodsOssImg(row.goods_img, 60)" :icon-size="22" />
-                                <div class="flex-1 pl8px">
-                                    <NuxtLink :to="`/goods/${row.goods_sn}`" target="_blank" class="goods-link">
-                                        {{ row.goods_name }}
-                                    </NuxtLink>
-                                </div>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="价格" width="120" property="meet_price" />
-                    <el-table-column label="退换数量" width="110" property="return_number" align="center">
-                        <template #default="{ row }">
-                            {{ row.goods_number }}
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="商品总金额" width="150" property="total" align="center">
-                        <template #default="{ row }">
-                            {{ formatNumber(row.goods_number * row.meet_price) }}
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <div class="tle my10px text-15px font-600 c-#222">
-                    操作日志
-                </div>
-                <el-table :data="orderInfo?.refund_log" size="small" border>
-                    <el-table-column label="操作者" width="120" property="author" show-overflow-tooltip />
-                    <el-table-column label="信息" min-width="160" property="content" show-overflow-tooltip />
-                    <el-table-column label="图片" width="80" property="img_url" align="center" show-overflow-tooltip>
-                        <template #default="{ row }">
-                            <CoImage :src="row.img_url" :preview-src-list="[row.img_url]"
-                                class="h30px w50px vertical-bottom" :icon-size="18" preview-teleported />
-                        </template>
-                    </el-table-column>
-                    <el-table-column label="时间" width="160" property="create_time" show-overflow-tooltip />
-                </el-table>
-            </div>
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 import { OrderReturnApi } from '~/api/goods/order'
@@ -333,6 +148,191 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="pb15px">
+                    <el-skeleton-item class="w20%!" />
+                </div>
+                <div class="mb20px border-1 p20px">
+                    <el-skeleton />
+                </div>
+                <div class="mb20px border-1 p20px">
+                    <el-skeleton />
+                </div>
+                <div class="min-h300px border-1 p20px">
+                    <el-skeleton />
+                </div>
+            </template>
+            <el-breadcrumb class="mb20px">
+                <el-breadcrumb-item v-for="item in breadcrumbData" :key="item.id" :to="item.href">
+                    {{ item.text }}
+                </el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="order-top mb20px border-1 p20px">
+                <div class="lt">
+                    <span class="mr20px">订单号：<b>{{ returnData?.main_order_no }}</b></span>
+                    <span class="mr20px">退换单号：<b>{{ return_no }}</b></span>
+                    <div class="mt10px">
+                        退换状态：<el-tag type="success" size="large">
+                            {{ defData.operateList[returnData?.status || 0] }}
+                        </el-tag>
+                    </div>
+                </div>
+                <div class="gt">
+                    <!--  -->
+                </div>
+
+                <div class="bane-item">
+                    <lazy-el-steps class="step-box" :active="stepSelect" finish-status="success">
+                        <el-step v-for="(item, index) in orderInfo?.flow_path" :key="index" :title="item.title"
+                            :description="item.item" />
+                    </lazy-el-steps>
+                </div>
+            </div>
+            <div class="mb20px border-1 p20px">
+                <div class="tle mb10px text-15px c-#222 font-600">
+                    退换信息
+                </div>
+                <ul class="collect-item">
+                    <!-- 下单时间：2023-05-30 13:18:38
+                <li>
+                    <div class="lt">
+                        下单时间：
+                    </div>
+                    <div class="gt">
+                        {{ orderInfo?.cerate_time }}
+                    </div>
+                </li> -->
+
+                    <li>
+                        <div class="lt">
+                            服务类型:
+                        </div>
+                        <div class="gt">
+                            <span class="mr-5px">{{ returnData?.is_all ? '全部' : '部分' }}</span>
+                            <el-tag v-if="returnData?.type === 1" type="info" size="small">
+                                退货/退款
+                            </el-tag>
+                            <el-tag v-else type="warning" size="small">
+                                换货
+                            </el-tag>
+                            <span v-if="returnData?.type === 1" class="ml20px">退款金额：<span class="color-primary">{{
+                                returnData?.meet_money }}</span></span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            退换理由:
+                        </div>
+                        <div class="gt">
+                            {{ returnData?.reason_name }}
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            问题描述:
+                        </div>
+                        <div class="gt">
+                            {{ returnData?.describe }}
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            物流公司:
+                        </div>
+                        <div class="gt">
+                            {{ returnData?.logistics_cusmoer || '--' }}
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            物流单号:
+                        </div>
+                        <div class="gt">
+                            {{ returnData?.logistics_no || '--' }}
+                        </div>
+                    </li>
+                    <el-form v-if="returnData?.status === 2 || returnData?.status === 3 || returnData?.status === 4"
+                        ref="formRef" :model="form.data" :label-width="100" :rules="rules">
+                        <el-row class="mt15px">
+                            <el-col :xs="18" :sm="18" :md="18" :lg="16" :xl="16">
+                                <el-form-item prop="describe" label="问题补充:">
+                                    <el-input v-model="form.data.describe" type="textarea" resize="none" :rows="3"
+                                        maxlength="80" clearable show-word-limit />
+                                </el-form-item>
+                                <template v-if="form.data.type === 2">
+                                    <el-form-item prop="logistics_name" label="物流公司:">
+                                        <el-input v-model="form.data.logistics_name" maxlength="30" clearable />
+                                    </el-form-item>
+                                    <el-form-item prop="logistics_no" label="物流单号:">
+                                        <el-input v-model="form.data.logistics_no" clearable />
+                                    </el-form-item>
+                                </template>
+                                <el-form-item label="">
+                                    <el-button type="primary" @click="onSubmit">
+                                        确定提交
+                                    </el-button>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :xs="6" :sm="6" :md="6" :lg="8" :xl="8">
+                                <el-form-item prop="img" label="图片:">
+                                    <CoUpload v-model="form.data.img" />
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                </ul>
+            </div>
+            <div class="mb20px border-1 p20px">
+                <div class="tle mb10px text-15px c-#222 font-600">
+                    退换商品
+                </div>
+                <el-table :data="orderInfo?.goods_list" class="return-table" border>
+                    <el-table-column label="商品信息" min-width="160" property="goods_name">
+                        <template #default="{ row }">
+                            <div class="flex items-center">
+                                <CoImage class="h45px w45px" :src="setGoodsOssImg(row.goods_img, 60)" :icon-size="22" />
+                                <div class="flex-1 pl8px">
+                                    <NuxtLink :to="`/goods/${row.goods_sn}`" target="_blank" class="goods-link">
+                                        {{ row.goods_name }}
+                                    </NuxtLink>
+                                </div>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="价格" width="120" property="meet_price" />
+                    <el-table-column label="退换数量" width="110" property="return_number" align="center">
+                        <template #default="{ row }">
+                            {{ row.goods_number }}
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="商品总金额" width="150" property="total" align="center">
+                        <template #default="{ row }">
+                            {{ formatNumber(row.goods_number * row.meet_price) }}
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <div class="tle my10px text-15px c-#222 font-600">
+                    操作日志
+                </div>
+                <el-table :data="orderInfo?.refund_log" size="small" border>
+                    <el-table-column label="操作者" width="120" property="author" show-overflow-tooltip />
+                    <el-table-column label="信息" min-width="160" property="content" show-overflow-tooltip />
+                    <el-table-column label="图片" width="80" property="img_url" align="center" show-overflow-tooltip>
+                        <template #default="{ row }">
+                            <CoImage :src="row.img_url" :preview-src-list="[row.img_url]"
+                                class="h30px w50px vertical-bottom" :icon-size="18" preview-teleported />
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="时间" width="160" property="create_time" show-overflow-tooltip />
+                </el-table>
+            </div>
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style lang="scss" scoped>
 .order-top {

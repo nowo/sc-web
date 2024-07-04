@@ -1,41 +1,4 @@
 <!-- 视频中心 -->
-<template>
-    <LayoutContent :type="3">
-        <div v-if="defData.type === 1">
-            <div v-if="defData.videoList.length === 0">
-                <el-empty description="暂无数据" />
-            </div>
-            <div v-else>
-                <el-space wrap>
-                    <div v-for="item in defData.videoList" :key="item.id" :data="defData">
-                        <img :src="item.sift_img" h160px w280px style="cursor: pointer;" @click="OpenContent(item.id)">
-                        <div style="font-size: 12px;margin-top: 10px;text-align: center;">
-                            {{ item.title }}
-                        </div>
-                    </div>
-                </el-space>
-            </div>
-            <div class="goods-pagination" mt25px>
-                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
-                    layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
-                    @current-change="onHandleSizeChange" />
-            </div>
-        </div>
-        <div v-else>
-            <el-button @click="defData.type = 1">
-                返回
-            </el-button>
-            <div style="font-size: 30px;text-align: center;">
-                {{ contentInfo?.title }}
-            </div>
-            <div>添加时间：{{ contentInfo?.add_time }}</div>
-            <div>作者：{{ contentInfo?.author }}</div>
-            <div class="text-content" v-html="contentInfo?.content" />
-            <div>浏览次数：{{ contentInfo?.browse_num }}</div>
-        </div>
-    </LayoutContent>
-</template>
-
 <script lang="ts" setup>
 import { VideoApi } from '~/api/brand/video'
 
@@ -59,7 +22,7 @@ const id = useRouteQuery('id')
 
 // 获取视频列表
 const initData = async () => {
-    if (process.client) document.documentElement.scrollTop = 0
+    if (import.meta.client) document.documentElement.scrollTop = 0
     // if (!(/^\d+$/.test(id.value))) return defData.error = true
     const param: VideoApi_GetVideoList = {
         id: Number(id.value),
@@ -96,3 +59,40 @@ watch(() => id.value, () => {
     initData()
 }, { immediate: true })
 </script>
+
+<template>
+    <LayoutContent :type="3">
+        <div v-if="defData.type === 1">
+            <div v-if="defData.videoList.length === 0">
+                <el-empty description="暂无数据" />
+            </div>
+            <div v-else>
+                <el-space wrap>
+                    <div v-for="item in defData.videoList" :key="item.id" :data="defData">
+                        <img :src="item.sift_img" h160px w280px style="cursor: pointer;" @click="OpenContent(item.id)">
+                        <div style="font-size: 12px;margin-top: 10px;text-align: center;">
+                            {{ item.title }}
+                        </div>
+                    </div>
+                </el-space>
+            </div>
+            <div class="goods-pagination" mt25px>
+                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
+                    layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
+                    @current-change="onHandleSizeChange" />
+            </div>
+        </div>
+        <div v-else>
+            <el-button @click="defData.type = 1">
+                返回
+            </el-button>
+            <div style="font-size: 30px;text-align: center;">
+                {{ contentInfo?.title }}
+            </div>
+            <div>添加时间：{{ contentInfo?.add_time }}</div>
+            <div>作者：{{ contentInfo?.author }}</div>
+            <div class="text-content" v-html="contentInfo?.content" />
+            <div>浏览次数：{{ contentInfo?.browse_num }}</div>
+        </div>
+    </LayoutContent>
+</template>

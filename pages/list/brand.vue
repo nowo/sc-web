@@ -1,33 +1,3 @@
-<template>
-    <div class="container">
-        <div class="brand-box min-h300px">
-            <el-skeleton class="brand-list" :loading="defData.skeleton" animated :count="24">
-                <template #template>
-                    <div class="brand-item">
-                        <el-skeleton-item variant="image" style="width:100%;height:65px;" />
-                        <el-skeleton-item class="mt10px" />
-                    </div>
-                </template>
-                <div class="brand-list">
-                    <div v-for="item in defData.brandList" :key="item.brand_id" class="brand-item">
-                        <NuxtLink :to="linkGoodsList({ query: { bid: item.brand_id }, url: true })">
-                            <co-image class="w100% pb45%" :src="item.brand_logo" :icon-size="24" />
-                            <div class="pt5px text-center text-14px">
-                                {{ item.brand_name }}
-                            </div>
-                        </NuxtLink>
-                    </div>
-                </div>
-                <div class="mt30px">
-                    <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
-                        layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
-                        @current-change="onHandleSizeChange" />
-                </div>
-            </el-skeleton>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { BrandApi } from '~/api/brand/brand'
 
@@ -66,6 +36,36 @@ const onHandleSizeChange = () => {
     initData()
 }
 </script>
+
+<template>
+    <div class="container">
+        <div class="brand-box min-h300px">
+            <el-skeleton class="brand-list" :loading="defData.skeleton" animated :count="24">
+                <template #template>
+                    <div class="brand-item">
+                        <el-skeleton-item variant="image" style="width:100%;height:65px;" />
+                        <el-skeleton-item class="mt10px" />
+                    </div>
+                </template>
+                <div class="brand-list">
+                    <div v-for="item in defData.brandList" :key="item.brand_id" class="brand-item">
+                        <NuxtLink :to="linkGoodsList({ query: { bid: item.brand_id }, url: true })">
+                            <co-image class="w100% pb45%" :src="item.brand_logo" :icon-size="24" />
+                            <div class="pt5px text-center text-14px">
+                                {{ item.brand_name }}
+                            </div>
+                        </NuxtLink>
+                    </div>
+                </div>
+                <div class="mt30px">
+                    <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
+                        layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
+                        @current-change="onHandleSizeChange" />
+                </div>
+            </el-skeleton>
+        </div>
+    </div>
+</template>
 
 <style lang="scss" scoped>
 .brand-box {

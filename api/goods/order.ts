@@ -28,7 +28,7 @@ export const OrderApi = {
      * @param data main_order_no:订单编号;   pay_type:支付方式 1微信 2支付宝 3线下
      * @returns
      */
-    payOrder: (data: { main_order_no: string; pay_type: 1 | 2 | 3 }) => useHttp<OrderApi_PayOrderWeChatResponse | string>('/api/mall/pay_order', data, { method: 'post' }),
+    payOrder: (data: { main_order_no: string, pay_type: 1 | 2 | 3 }) => useHttp<OrderApi_PayOrderWeChatResponse | string>('/api/mall/pay_order', data, { method: 'post' }),
 
     /**
      * 获取订单支付方式

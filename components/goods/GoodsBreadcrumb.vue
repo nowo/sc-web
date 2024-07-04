@@ -1,18 +1,4 @@
 <!-- 面包屑导航 -->
-<template>
-    <el-breadcrumb class="breadcrumb-box">
-        <el-breadcrumb-item :to="{ path: '/' }">
-            首页
-        </el-breadcrumb-item>
-        <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.id">
-            <span v-if="index + 1 === breadcrumbList?.length">{{ item.name }}</span>
-            <NuxtLink v-else :to="linkGoodsList({ query: { cid: item.id }, url: true })">
-                {{ item.name }}
-            </NuxtLink>
-        </el-breadcrumb-item>
-    </el-breadcrumb>
-</template>
-
 <script lang="ts" setup>
 interface BreadcrumbItemType {
     id: number
@@ -45,5 +31,19 @@ const breadcrumbList = computed(() => {
     return list
 })
 </script>
+
+<template>
+    <el-breadcrumb class="breadcrumb-box">
+        <el-breadcrumb-item :to="{ path: '/' }">
+            首页
+        </el-breadcrumb-item>
+        <el-breadcrumb-item v-for="(item, index) in breadcrumbList" :key="item.id">
+            <span v-if="index + 1 === breadcrumbList?.length">{{ item.name }}</span>
+            <NuxtLink v-else :to="linkGoodsList({ query: { cid: item.id }, url: true })">
+                {{ item.name }}
+            </NuxtLink>
+        </el-breadcrumb-item>
+    </el-breadcrumb>
+</template>
 
 <style lang="scss" scoped></style>

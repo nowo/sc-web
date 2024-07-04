@@ -41,7 +41,6 @@
 
 - 📲 [PWA](https://github.com/vite-pwa/nuxt) with offline support and auto update behavior.
 
-
 ## Plugins
 
 ### Nuxt Modules
@@ -82,8 +81,6 @@ npx degit antfu/vitesse-nuxt3 my-nuxt3-app
 cd my-nuxt3-app
 pnpm i # If you don't have pnpm installed, run: npm install -g pnpm
 ```
-
-
 
 ### 服务器仓库地址
 ```bash

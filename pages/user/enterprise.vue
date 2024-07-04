@@ -1,3 +1,137 @@
+<script setup lang="ts">
+import type { FormInstance, FormRules } from 'element-plus'
+import { EnterpriseApi } from '~/api/user/enterprise'
+
+const formRef = ref<FormInstance>()
+const userState = useUserState()
+const activeName = ref('first')
+const testUrl = 'https://5b0988e595225.cdn.sohucs.com/images/20171111/d2d60e489c3e4517ac2780c0058a7ef0.jpeg'
+const defData = reactive({
+    download: {
+        label: '下载',
+        name: '企业客户账号申请表模板',
+        url: '/certification.docx',
+    },
+    user_id: 0,
+    attest_status: 0,
+    enterprise_name: '',
+    visible: false,
+    skeleton: true,
+})
+
+const userStatus = async () => {
+    const user = await userState.getUserInfo()
+    if (user.value) {
+        defData.user_id = user.value.user_id
+        defData.attest_status = user.value.attest_status
+        defData.enterprise_name = user.value.enterprise_name
+    } else {
+        return ElMessage.error('请先登录')
+    }
+    await wait(10)
+    defData.skeleton = false
+}
+userStatus()
+
+// 表单数据
+const form = reactive({
+    enterprise_name: '',
+    enterprise_code: '',
+    enterprise_account: '',
+    enterprise_contacts: '',
+    contacts_post: '',
+    contacts_phone: '',
+    contacts_email: '',
+    enterprise_industry: '',
+    enterprise_capital: 0,
+    enterprise_address: '',
+    enterprise_remark: '',
+    enterprise_file: '',
+    failed_remark: '',
+})
+const rules = reactive<FormRules>({
+    enterprise_name: [
+        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    enterprise_code: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    enterprise_account: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    enterprise_contacts: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    contacts_phone: [
+        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+    ],
+    enterprise_address: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    enterprise_industry: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+    enterprise_file: [
+        { required: true, message: '必填项不能为空', trigger: 'blur' },
+    ],
+
+})
+
+// 确定
+const onSubmit = async () => {
+    const isVerify = await useFormVerify(formRef.value)
+    if (!isVerify) return
+    // if (!isRun) return ElMessage.error('请填写完整')
+    const data: EnterpriseApi_attest = {
+        enterprise_name: form.enterprise_name,
+        enterprise_code: form.enterprise_code,
+        enterprise_account: form.enterprise_account,
+        enterprise_contacts: form.enterprise_contacts,
+        contacts_post: form.contacts_post,
+        contacts_phone: form.contacts_phone,
+        contacts_email: form.contacts_email,
+        enterprise_industry: form.enterprise_industry,
+        enterprise_capital: Number(form.enterprise_capital),
+        enterprise_address: form.enterprise_address,
+        enterprise_remark: form.enterprise_remark,
+        enterprise_file: form.enterprise_file,
+        user_id: Number(defData.user_id),
+    }
+    const { data: res } = await EnterpriseApi.attest(data)
+    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
+    ElMessage.success('提交成功')
+    defData.visible = false
+    userStatus()
+}
+
+//  打开弹窗
+const onOpenDialog = async () => {
+    const { data: res } = await EnterpriseApi.info({ user_id: defData.user_id })
+    if (res.value?.data) {
+        form.enterprise_name = res.value?.data.enterprise_name
+        form.enterprise_code = res.value?.data.enterprise_code
+        form.enterprise_account = res.value?.data.enterprise_account
+        form.enterprise_contacts = res.value?.data.enterprise_contacts
+        form.contacts_post = res.value?.data.contacts_post
+        form.contacts_phone = res.value?.data.contacts_phone
+        form.contacts_email = res.value?.data.contacts_email
+        form.enterprise_industry = res.value?.data.enterprise_industry
+        form.enterprise_capital = res.value?.data.enterprise_capital
+        form.enterprise_address = res.value?.data.enterprise_address
+        form.enterprise_remark = res.value?.data.enterprise_remark
+        form.enterprise_file = res.value?.data.enterprise_file
+        form.failed_remark = res.value?.data.failed_remark
+    }
+    defData.visible = true
+}
+
+definePageMeta({
+    layout: 'home',
+    middleware: 'auth',
+})
+</script>
+
 <template>
     <!-- <ClientOnly> -->
     <LayoutUser>
@@ -104,139 +238,6 @@
     </LayoutUser>
     <!-- </ClientOnly> -->
 </template>
-
-<script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
-import { EnterpriseApi } from '~/api/user/enterprise'
-
-const formRef = ref<FormInstance>()
-const userState = useUserState()
-const activeName = ref('first')
-const testUrl = 'https://5b0988e595225.cdn.sohucs.com/images/20171111/d2d60e489c3e4517ac2780c0058a7ef0.jpeg'
-const defData = reactive({
-    download: {
-        label: '下载',
-        name: '企业客户账号申请表模板',
-        url: '/certification.docx',
-    },
-    user_id: 0,
-    attest_status: 0,
-    enterprise_name: '',
-    visible: false,
-    skeleton: true,
-})
-
-const userStatus = async () => {
-    const user = await userState.getUserInfo()
-    if (user.value) {
-        defData.user_id = user.value.user_id
-        defData.attest_status = user.value.attest_status
-        defData.enterprise_name = user.value.enterprise_name
-    } else {
-        return ElMessage.error('请先登录')
-    }
-    await wait(10)
-    defData.skeleton = false
-}
-userStatus()
-
-// 表单数据
-const form = reactive({
-    enterprise_name: '',
-    enterprise_code: '',
-    enterprise_account: '',
-    enterprise_contacts: '',
-    contacts_post: '',
-    contacts_phone: '',
-    contacts_email: '',
-    enterprise_industry: '',
-    enterprise_capital: 0,
-    enterprise_address: '',
-    enterprise_remark: '',
-    enterprise_file: '',
-    failed_remark: '',
-})
-const rules = reactive<FormRules>({
-    enterprise_name: [
-        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    enterprise_code: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    enterprise_account: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    enterprise_contacts: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    contacts_phone: [
-        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
-    ],
-    enterprise_address: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    enterprise_industry: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-    enterprise_file: [
-        { required: true, message: '必填项不能为空', trigger: 'blur' },
-    ],
-
-})
-
-// 确定
-const onSubmit = async () => {
-    const isRun = await formRef.value?.validate((valid, _fields) => !!valid)
-    if (!isRun) return ElMessage.error('请填写完整')
-    const data: EnterpriseApi_attest = {
-        enterprise_name: form.enterprise_name,
-        enterprise_code: form.enterprise_code,
-        enterprise_account: form.enterprise_account,
-        enterprise_contacts: form.enterprise_contacts,
-        contacts_post: form.contacts_post,
-        contacts_phone: form.contacts_phone,
-        contacts_email: form.contacts_email,
-        enterprise_industry: form.enterprise_industry,
-        enterprise_capital: Number(form.enterprise_capital),
-        enterprise_address: form.enterprise_address,
-        enterprise_remark: form.enterprise_remark,
-        enterprise_file: form.enterprise_file,
-        user_id: Number(defData.user_id),
-    }
-    const { data: res } = await EnterpriseApi.attest(data)
-    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
-    ElMessage.success('提交成功')
-    defData.visible = false
-    userStatus()
-}
-
-//  打开弹窗
-const onOpenDialog = async () => {
-    const { data: res } = await EnterpriseApi.info({ user_id: defData.user_id })
-    if (res.value?.data) {
-        form.enterprise_name = res.value?.data.enterprise_name
-        form.enterprise_code = res.value?.data.enterprise_code
-        form.enterprise_account = res.value?.data.enterprise_account
-        form.enterprise_contacts = res.value?.data.enterprise_contacts
-        form.contacts_post = res.value?.data.contacts_post
-        form.contacts_phone = res.value?.data.contacts_phone
-        form.contacts_email = res.value?.data.contacts_email
-        form.enterprise_industry = res.value?.data.enterprise_industry
-        form.enterprise_capital = res.value?.data.enterprise_capital
-        form.enterprise_address = res.value?.data.enterprise_address
-        form.enterprise_remark = res.value?.data.enterprise_remark
-        form.enterprise_file = res.value?.data.enterprise_file
-        form.failed_remark = res.value?.data.failed_remark
-    }
-    defData.visible = true
-}
-
-definePageMeta({
-    layout: 'home',
-    middleware: 'auth',
-})
-</script>
 
 <style scoped>
 .el-input {

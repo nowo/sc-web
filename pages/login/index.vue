@@ -1,61 +1,3 @@
-<template>
-    <div class="login-page flex items-center justify-center">
-        <div class="login">
-            <div class="text-center text-20px font-bold mb20px color-#333">
-                账号登录
-            </div>
-
-            <el-form ref="formRef" label-width="auto" :rules="rules" :model="form" size="large">
-                <el-form-item prop="phone">
-                    <el-input v-model="form.phone" placeholder="请输入手机号">
-                        <template #prefix>
-                            <i class=" i-ep-user">
-                            </i>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item v-if="defData.type === 1" prop="password">
-                    <el-input v-model="form.password" placeholder="请输入密码" show-password>
-                        <template #prefix>
-                            <i class=" i-ep-lock">
-                            </i>
-                        </template>
-                    </el-input>
-                </el-form-item>
-                <el-form-item v-else prop="validate_code">
-                    <el-col :span="15">
-                        <el-input v-model.trim="form.validate_code" type="text" placeholder="请输入短信验证码" clearable
-                            tabindex="3" />
-                    </el-col>
-                    <el-col :span="1" />
-                    <el-col :span="8">
-                        <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
-                            获取验证码
-                        </el-button>
-                        <el-button v-else class="w100%">
-                            {{ defData.time }}秒
-                        </el-button>
-                    </el-col>
-                </el-form-item>
-                <el-form-item>
-                    <el-button class="w100% mt10px" :loading="form.loading"  type="primary" plain @click="onClick">
-                        {{ defData.type !== 3 ? '登 录' : '进入工游记' }}
-                    </el-button>
-                </el-form-item>
-            </el-form>
-            <div class="flex justify-between mt-10px">
-                <NuxtLink to="/login/register">
-                    立即注册
-                </NuxtLink>
-                <NuxtLink to="/login/forgotPassword">
-                    忘记密码?
-                </NuxtLink>
-            </div>
-
-        </div>
-    </div>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 
@@ -88,7 +30,7 @@ const form = reactive({
 const rules = reactive<FormRules>({
     phone: [
         { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' },
     ],
     password: [
         { required: true, message: '请输入登录密码', trigger: 'blur' },
@@ -224,8 +166,62 @@ const getOpenId = async () => {
 getOpenId()
 </script>
 
-<style lang="scss" scoped>
+<template>
+    <div class="login-page flex items-center justify-center">
+        <div class="login">
+            <div class="mb20px text-center text-20px color-#333 font-bold">
+                账号登录
+            </div>
 
+            <el-form ref="formRef" label-width="auto" :rules="rules" :model="form" size="large">
+                <el-form-item prop="phone">
+                    <el-input v-model="form.phone" placeholder="请输入手机号">
+                        <template #prefix>
+                            <i class="i-ep-user" />
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item v-if="defData.type === 1" prop="password">
+                    <el-input v-model="form.password" placeholder="请输入密码" show-password>
+                        <template #prefix>
+                            <i class="i-ep-lock" />
+                        </template>
+                    </el-input>
+                </el-form-item>
+                <el-form-item v-else prop="validate_code">
+                    <el-col :span="15">
+                        <el-input v-model.trim="form.validate_code" type="text" placeholder="请输入短信验证码" clearable
+                            tabindex="3" />
+                    </el-col>
+                    <el-col :span="1" />
+                    <el-col :span="8">
+                        <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
+                            获取验证码
+                        </el-button>
+                        <el-button v-else class="w100%">
+                            {{ defData.time }}秒
+                        </el-button>
+                    </el-col>
+                </el-form-item>
+                <el-form-item>
+                    <el-button class="mt10px w100%" :loading="form.loading" type="primary" plain @click="onClick">
+                        {{ defData.type !== 3 ? '登 录' : '进入工游记' }}
+                    </el-button>
+                </el-form-item>
+            </el-form>
+            <div class="mt-10px flex justify-between">
+                <NuxtLink to="/login/register">
+                    立即注册
+                </NuxtLink>
+                <NuxtLink to="/login/forgotPassword">
+                    忘记密码?
+                </NuxtLink>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style lang="scss" scoped>
 .login-page {
     width: 100%;
     height: 700px;
@@ -242,5 +238,4 @@ getOpenId()
     margin-top: -115px;
     padding: 40px 35px;
 }
-
 </style>

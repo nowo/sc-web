@@ -1,27 +1,3 @@
-<template>
-    <div class="goods-image mb10px">
-        <!-- 大图 -->
-        <div v-show="show" class="large" :style="[{ backgroundImage: `url(${imgList.big[currIndex]})` }, largePosition]" />
-        <!-- 中图 -->
-        <div ref="target" class="middle" @mousemove="moveImg" @mouseleave="moveOutImg">
-            <img :src="imgList.big[currIndex]" alt="">
-            <!-- 遮罩色块 -->
-            <div v-show="show" class="layer" :style="layerPosition" />
-        </div>
-    </div>
-    <div class="swiper-box">
-        <Swiper class="swp" :slides-per-view="5" :slides-per-group="5" :space-between="10" :navigation="navigate"
-            :modules="modules">
-            <SwiperSlide v-for="(item, index) in imgList.small" :key="index" class="swp-slide"
-                :class="{ active: index === currIndex }">
-                <img :src="item" alt="" @mouseenter="currIndex = index">
-            </SwiperSlide>
-        </Swiper>
-        <div class="swiper-button-next" />
-        <div class="swiper-button-prev" />
-    </div>
-</template>
-
 <script  lang="ts" setup>
 import { reactive, ref } from 'vue'
 import { useMouseInElement } from '@vueuse/core'
@@ -153,6 +129,30 @@ const moveOutImg = () => {
 //     largePosition.backgroundPositionY = -2 * position.y + 'px'
 // })
 </script>
+
+<template>
+    <div class="goods-image mb10px">
+        <!-- 大图 -->
+        <div v-show="show" class="large" :style="[{ backgroundImage: `url(${imgList.big[currIndex]})` }, largePosition]" />
+        <!-- 中图 -->
+        <div ref="target" class="middle" @mousemove="moveImg" @mouseleave="moveOutImg">
+            <img :src="imgList.big[currIndex]" alt="">
+            <!-- 遮罩色块 -->
+            <div v-show="show" class="layer" :style="layerPosition" />
+        </div>
+    </div>
+    <div class="swiper-box">
+        <Swiper class="swp" :slides-per-view="5" :slides-per-group="5" :space-between="10" :navigation="navigate"
+            :modules="modules">
+            <SwiperSlide v-for="(item, index) in imgList.small" :key="index" class="swp-slide"
+                :class="{ active: index === currIndex }">
+                <img :src="item" alt="" @mouseenter="currIndex = index">
+            </SwiperSlide>
+        </Swiper>
+        <div class="swiper-button-next" />
+        <div class="swiper-button-prev" />
+    </div>
+</template>
 
 <style scoped lang="scss">
 .swiper-box {

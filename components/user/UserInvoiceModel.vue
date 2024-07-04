@@ -1,80 +1,4 @@
 <!-- 新增、修改发票 -->
-<template>
-    <!-- auto-height -->
-    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
-        width="680px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
-        <el-form ref="formRef" :model="form.data" :label-width="130" :rules="rules">
-            <el-row>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="enterprise_name" label="企业名称：">
-                        <el-input v-model="form.data.enterprise_name" placeholder="请输入企业名称" maxlength="40" clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="enterprise_email" label="企业邮箱：">
-                        <el-input v-model="form.data.enterprise_email" type="email" placeholder="请输入企业邮箱" maxlength="40"
-                            clearable />
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item prop="type" label="发票类型：">
-                        <el-radio-group v-model="form.data.type">
-                            <el-radio :label="1" border>
-                                增值税专用发票
-                            </el-radio>
-                            <el-radio :label="2" border>
-                                普通发票
-                            </el-radio>
-                            <el-radio :label="3" border>
-                                电子普通发票
-                            </el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
-                    <el-form-item prop="tax_no" label="纳税人识别号：">
-                        <el-input v-model="form.data.tax_no" placeholder="请输入纳税人识别号" clearable />
-                    </el-form-item>
-                </el-col>
-                <template v-if="form.data.type === 1">
-                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
-                        <el-form-item prop="logon_tel" label="注册电话：">
-                            <el-input v-model="form.data.logon_tel" placeholder="请输入注册电话" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                        <el-form-item prop="logon_addr" label="注册地址：">
-                            <el-input v-model="form.data.logon_addr" placeholder="请输入注册地址" maxlength="100" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                        <el-form-item prop="bank" label="开户银行：">
-                            <el-input v-model="form.data.bank" placeholder="请输入开户银行" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
-                        <el-form-item prop="bank_account" label="开户账号：">
-                            <el-input v-model="form.data.bank_account" placeholder="请输入开户账号" maxlength="20" clearable />
-                        </el-form-item>
-                    </el-col>
-                </template>
-                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-                    <el-form-item v-if="defData.type === 2" prop="is_default" label="设为默认：">
-                        <el-radio-group v-model="form.data.is_default">
-                            <el-radio :label="0">
-                                否
-                            </el-radio>
-                            <el-radio :label="1">
-                                是
-                            </el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                </el-col>
-            </el-row>
-        </el-form>
-    </CoDialog>
-</template>
-
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 
@@ -239,5 +163,81 @@ defineExpose({
     onOpenDialog,
 })
 </script>
+
+<template>
+    <!-- auto-height -->
+    <CoDialog v-model:visible="defData.visible" :loading="defData.btnLoading" auto-height hidden :title="comData.title"
+        width="680px" @close="onClose" @cancel="onClose" @confirm="onConfirm">
+        <el-form ref="formRef" :model="form.data" :label-width="130" :rules="rules">
+            <el-row>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="enterprise_name" label="企业名称：">
+                        <el-input v-model="form.data.enterprise_name" placeholder="请输入企业名称" maxlength="40" clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="enterprise_email" label="企业邮箱：">
+                        <el-input v-model="form.data.enterprise_email" type="email" placeholder="请输入企业邮箱" maxlength="40"
+                            clearable />
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item prop="type" label="发票类型：">
+                        <el-radio-group v-model="form.data.type">
+                            <el-radio :label="1" border>
+                                增值税专用发票
+                            </el-radio>
+                            <el-radio :label="2" border>
+                                普通发票
+                            </el-radio>
+                            <el-radio :label="3" border>
+                                电子普通发票
+                            </el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+                <el-col :xs="24" :sm="16" :md="16" :lg="16" :xl="16">
+                    <el-form-item prop="tax_no" label="纳税人识别号：">
+                        <el-input v-model="form.data.tax_no" placeholder="请输入纳税人识别号" clearable />
+                    </el-form-item>
+                </el-col>
+                <template v-if="form.data.type === 1">
+                    <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12">
+                        <el-form-item prop="logon_tel" label="注册电话：">
+                            <el-input v-model="form.data.logon_tel" placeholder="请输入注册电话" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                        <el-form-item prop="logon_addr" label="注册地址：">
+                            <el-input v-model="form.data.logon_addr" placeholder="请输入注册地址" maxlength="100" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                        <el-form-item prop="bank" label="开户银行：">
+                            <el-input v-model="form.data.bank" placeholder="请输入开户银行" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :xs="24" :sm="22" :md="22" :lg="22" :xl="22">
+                        <el-form-item prop="bank_account" label="开户账号：">
+                            <el-input v-model="form.data.bank_account" placeholder="请输入开户账号" maxlength="20" clearable />
+                        </el-form-item>
+                    </el-col>
+                </template>
+                <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
+                    <el-form-item v-if="defData.type === 2" prop="is_default" label="设为默认：">
+                        <el-radio-group v-model="form.data.is_default">
+                            <el-radio :label="0">
+                                否
+                            </el-radio>
+                            <el-radio :label="1">
+                                是
+                            </el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+    </CoDialog>
+</template>
 
 <style lang="scss" scoped></style>

@@ -1,26 +1,3 @@
-<template>
-    <div class="container">
-        <div style="height: 680px;background-color: rgb(255, 255, 255);margin: 20px 0;">
-            <div>
-                <el-space wrap :size="20">
-                    <div v-for="item in defData.BrandList" :key="item.brand_id" :data="defData" ml30px mt50px>
-                        <!-- <img :src="item.brand_logo" h55px w140px> -->
-                        <co-image class="h55px w140px" :src="item.brand_logo" :icon-size="24" />
-                        <div style="font-size: 12px;margin-top: 10px;text-align: center;">
-                            {{ item.brand_name }}
-                        </div>
-                    </div>
-                </el-space>
-            </div>
-            <div class="goods-pagination" ml30px mt25px>
-                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
-                    layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
-                    @current-change="onHandleSizeChange" />
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup lang="ts">
 import { BrandApi } from '~/api/brand/brand'
 
@@ -53,5 +30,28 @@ const onHandleSizeChange = () => {
     initData()
 }
 </script>
+
+<template>
+    <div class="container">
+        <div style="height: 680px;background-color: rgb(255, 255, 255);margin: 20px 0;">
+            <div>
+                <el-space wrap :size="20">
+                    <div v-for="item in defData.BrandList" :key="item.brand_id" :data="defData" ml30px mt50px>
+                        <!-- <img :src="item.brand_logo" h55px w140px> -->
+                        <co-image class="h55px w140px" :src="item.brand_logo" :icon-size="24" />
+                        <div style="font-size: 12px;margin-top: 10px;text-align: center;">
+                            {{ item.brand_name }}
+                        </div>
+                    </div>
+                </el-space>
+            </div>
+            <div class="goods-pagination" ml30px mt25px>
+                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
+                    layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
+                    @current-change="onHandleSizeChange" />
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped></style>

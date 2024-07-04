@@ -1,3 +1,125 @@
+<script setup lang="ts">
+import type { FormInstance, FormRules } from 'element-plus'
+import { LoginApi } from '~/api/login'
+
+const route = useRoute()
+
+const userState = useUserState()
+
+definePageMeta({
+    layout: 'login',
+})
+
+// 获取商城信息
+const useSystem = useSystemState()
+
+const defData = reactive({
+    time: 0, // 验证码倒计时时间
+    sendCode: true, // true：发送验证码 false:倒计时
+    type: 1, // 1：工游记网站服务协议，2：工游记隐私政策
+    agreement: '', // 工游记网站服务协议
+    policy: '', // 工游记隐私政策
+    visible: false, //
+})
+
+const comData = computed(() => {
+    let dat = {
+        title: '工游记网站服务协议',
+    }
+    if (defData.type === 2) {
+        dat = {
+            title: '工游记隐私政策',
+        }
+    }
+    return dat
+})
+
+const formRef = ref<FormInstance>()
+
+const form = reactive({
+    validate_code: '',
+    password: '',
+    phone: '',
+    agree: false,
+    // loading: true,
+})
+
+const rules = reactive<FormRules>({
+    phone: [
+        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
+        { required: true, pattern: /^1(3\d|4[014-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/, message: '填写正确的手机号格式', trigger: 'blur' },
+    ],
+    validate_code: [
+        { required: true, message: '请输入验证码', trigger: 'blur' },
+    ],
+})
+
+const infoData = async () => {
+    const systemInfo = await useSystem.getSystemInfo()
+    if (systemInfo.value) {
+        defData.policy = systemInfo.value.policy
+        defData.agreement = systemInfo.value.agreement
+    }
+}
+infoData()
+
+// 打开网站服务协议
+const openWeb = async () => {
+    defData.type = 1
+    defData.visible = true
+}
+// 打开网站服务协议
+const openPolicy = async () => {
+    defData.type = 2
+    defData.visible = true
+}
+// 关闭弹窗
+const onClose = () => {
+    defData.visible = false
+}
+// 获取短信验证码
+const getCodeClick = async () => {
+    if (!form.phone) ElMessage.error('请先输入手机号码')
+
+    const data: LoginApi_validateCode = {
+        type: 1,
+        phone: form.phone,
+    }
+    const { data: res } = await LoginApi.validateCode(data)
+    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
+    ElMessage.success('发送成功')
+    defData.sendCode = false
+    defData.time = 60
+    const times = setInterval(() => {
+        defData.time--
+        if (defData.time <= 0) {
+            defData.sendCode = true
+            clearInterval(times)
+        }
+    }, 1000)
+}
+
+// 注册
+const onClick = async () => {
+    const isVerify = await useFormVerify(formRef.value)
+    if (!isVerify) return
+    if (form.agree === false) return ElMessage.error('请阅读并同意《工游记网站服务协议》《工游记隐私政策》')
+    const data: LoginApi_Login = {
+        type: 3,
+        phone: form.phone,
+        validate_code: form.validate_code,
+    }
+    if (route.query.id) data.share_id = Number(route.query.id)
+    if (route.query.salesman_id) data.salesman_id = Number(route.query.salesman_id)
+
+    const { data: res } = await LoginApi.Login(data)
+    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
+    ElMessage.success('注册成功')
+    userState.setToken(res.value.data.token)
+    return navigateTo('/user/account')
+}
+</script>
+
 <template>
     <div class="container">
         <div style="height: 650px;background-color: white;margin: 10px 0;">
@@ -51,139 +173,19 @@
                 </div>
             </div>
         </div>
+        <client-only>
+            <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
+                @close="onClose">
+                <div v-if="defData.type === 1">
+                    <p v-html="defData.agreement" />
+                </div>
+                <div v-else>
+                    <p v-html="defData.policy" />
+                </div>
+            </el-dialog>
+        </client-only>
     </div>
-    <client-only>
-        <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
-            @close="onClose">
-            <div v-if="defData.type === 1">
-                <p v-html="defData.agreement" />
-            </div>
-            <div v-else>
-                <p v-html="defData.policy" />
-            </div>
-        </el-dialog>
-    </client-only>
+
 </template>
-
-<script setup lang="ts">
-import type { FormInstance, FormRules } from 'element-plus'
-import { LoginApi } from '~/api/login'
-
-const route = useRoute()
-
-const userState = useUserState()
-
-definePageMeta({
-    layout: 'login',
-})
-
-// 获取商城信息
-const useSystem = useSystemState()
-const infoData = async () => {
-    const systemInfo = await useSystem.getSystemInfo()
-    if (systemInfo.value) {
-        defData.policy = systemInfo.value.policy
-        defData.agreement = systemInfo.value.agreement
-    }
-}
-infoData()
-
-const defData = reactive({
-    time: 0, // 验证码倒计时时间
-    sendCode: true, // true：发送验证码 false:倒计时
-    type: 1, // 1：工游记网站服务协议，2：工游记隐私政策
-    agreement: '', // 工游记网站服务协议
-    policy: '', // 工游记隐私政策
-    visible: false, //
-})
-
-const comData = computed(() => {
-    let dat = {
-        title: '工游记网站服务协议',
-    }
-    if (defData.type === 2) {
-        dat = {
-            title: '工游记隐私政策',
-        }
-    }
-    return dat
-})
-
-const formRef = ref<FormInstance>()
-
-const form = reactive({
-    validate_code: '',
-    password: '',
-    phone: '',
-    agree: false,
-    // loading: true,
-})
-
-const rules = reactive<FormRules>({
-    phone: [
-        { required: true, whitespace: true, message: '必填项不能为空', trigger: 'blur' },
-        { required: true, pattern: /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/, message: '填写正确的手机号格式', trigger: 'blur' },
-    ],
-    validate_code: [
-        { required: true, message: '请输入验证码', trigger: 'blur' },
-    ],
-})
-
-// 打开网站服务协议
-const openWeb = async () => {
-    defData.type = 1
-    defData.visible = true
-}
-// 打开网站服务协议
-const openPolicy = async () => {
-    defData.type = 2
-    defData.visible = true
-}
-// 关闭弹窗
-const onClose = () => {
-    defData.visible = false
-}
-// 获取短信验证码
-const getCodeClick = async () => {
-    if (!form.phone) ElMessage.error('请先输入手机号码')
-
-    const data: LoginApi_validateCode = {
-        type: 1,
-        phone: form.phone,
-    }
-    const { data: res } = await LoginApi.validateCode(data)
-    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
-    ElMessage.success('发送成功')
-    defData.sendCode = false
-    defData.time = 60
-    const times = setInterval(() => {
-        defData.time--
-        if (defData.time <= 0) {
-            defData.sendCode = true
-            clearInterval(times)
-        }
-    }, 1000)
-}
-
-// 注册
-const onClick = async () => {
-    const isRun = await formRef.value?.validate((valid, _fields) => !!valid)
-    if (!isRun) return
-    if (form.agree === false) return ElMessage.error('请阅读并同意《工游记网站服务协议》《工游记隐私政策》')
-    const data: LoginApi_Login = {
-        type: 3,
-        phone: form.phone,
-        validate_code: form.validate_code,
-    }
-    if (route.query.id) data.share_id = Number(route.query.id)
-    if (route.query.salesman_id) data.salesman_id = Number(route.query.salesman_id)
-
-    const { data: res } = await LoginApi.Login(data)
-    if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
-    ElMessage.success('注册成功')
-    userState.setToken(res.value.data.token)
-    return navigateTo('/user/account')
-}
-</script>
 
 <style scoped></style>

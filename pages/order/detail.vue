@@ -1,196 +1,4 @@
 <!-- 订单详情页面 -->
-<template>
-    <LayoutUser>
-        <el-skeleton :loading="defData.skeleton" animated>
-            <template #template>
-                <div class="pb15px">
-                    <el-skeleton-item class="w20%!" />
-                </div>
-                <div class="mb20px border-1 p20px">
-                    <el-skeleton />
-                </div>
-                <div class="mb20px border-1 p20px">
-                    <el-skeleton />
-                </div>
-                <div class="min-h300px border-1 p20px">
-                    <el-skeleton />
-                </div>
-            </template>
-            <el-breadcrumb class="mb20px">
-                <el-breadcrumb-item v-for="item in breadcrumbData" :key="item.id" :to="item.href">
-                    {{ item.text }}
-                </el-breadcrumb-item>
-            </el-breadcrumb>
-            <div class="mb20px border-1 p20px">
-                <div class="order-top mb20px min-h40px">
-                    <div class="lt">
-                        <span class="mr20px">订单号：<b>{{ order_no }}</b></span>
-                        <span>订单状态：
-                            <el-text class="font-bold" size="large" :type="orderState.type"
-                                :style="`color: ${orderState.color};`">
-                                {{ orderState.text }}
-                            </el-text>
-                        </span>
-                        <div v-if="orderInfo?.order_status === 1" class="mt10px">
-                            您的订单已提交成功，请尽快完成付款哦！
-                            <el-countdown v-if="orderInfo?.pay_type === 3" format="[剩余]DD[天]HH[时]mm[分]ss[秒]"
-                                :value="setEndTime()" value-style="font-size:13px;color:#f00;" @finish="onFinish()" />
-                        </div>
-                    </div>
-                    <div class="gt">
-                        <OrderOperate class="order-ope"
-                            :data="{ order_no, status: orderInfo!.order_status, bill_status: orderInfo!.bill_status, is_return: orderInfo!.is_refund }"
-                            @update="updateOrder" />
-                    </div>
-                </div>
-                <div class="bane-item">
-                    <lazy-el-steps class="step-box" :active="stepSelect" finish-status="success">
-                        <el-step v-for="(item, index) in orderInfo?.status_info" :key="index" :title="item.text"
-                            :description="item.time" />
-                    </lazy-el-steps>
-                </div>
-            </div>
-            <div class="mb20px border-1 p20px">
-                <div class="tle mb10px text-15px font-600 c-#222">
-                    订单信息
-                </div>
-                <ul class="collect-item">
-                    <!-- 下单时间：2023-05-30 13:18:38
-                <li>
-                    <div class="lt">
-                        下单时间：
-                    </div>
-                    <div class="gt">
-                        {{ orderInfo?.cerate_time }}
-                    </div>
-                </li> -->
-
-                    <li>
-                        <div class="lt">
-                            收货信息：
-                        </div>
-                        <div class="gt">
-                            <div>{{ orderInfo?.consignee_name }}&emsp;{{ orderInfo?.consignee_phone }}</div>
-                            <el-text> {{ addressText }} </el-text>
-                            <span class="ml8px text-12px c-#999"> 收货信息有误？请立即联系客服修改</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            备注信息：
-                        </div>
-                        <div class="gt">
-                            {{ orderInfo?.remarks }}
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            配送方式：
-                        </div>
-                        <div class="gt">
-                            <div v-for="(item, index) in logisticsList" :key="index">
-                                {{ item.logistics_name }} <span class="mr20px opacity-80">({{ item.logistics_no }})</span>
-                                <span class="c-#666">发货时间：{{ item.create_time }}</span>
-
-                                <span class="ml25px c-#222">{{ item.goods_name }}</span>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            支付方式：
-                        </div>
-                        <div class="gt">
-                            <span v-if="orderInfo?.pay_type === 1">微信支付</span>
-                            <span v-else-if="orderInfo?.pay_type === 2">支付宝支付</span>
-                            <span v-else-if="orderInfo?.pay_type === 3" class="color-warning">线下支付</span>
-                            <span v-else>--</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="lt">
-                            支付时间：
-                        </div>
-                        <div class="gt">
-                            {{ orderInfo?.pay_time }}
-                        </div>
-                    </li>
-                    <li v-if="orderInfo!.bill_status">
-                        <div class="lt">
-                            发票信息：
-                        </div>
-                        <div class="gt">
-                            <el-link style="--el-link-font-size:13px;" @click="onInvoiceDetail">
-                                <i class="i-ep-view inline-block" />查看
-                            </el-link>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="mb10px border-1 p20px">
-                <div class="tle mb10px text-15px font-600 c-#222">
-                    商品信息
-                </div>
-                <el-table :data="orderInfo?.goods_list" border>
-                    <el-table-column prop="goods_name" label="商品名称" min-width="180">
-                        <template #default="{ row }">
-                            <div class="h50px flex items-center">
-                                <CoImage class="h50px w50px" :src="setGoodsOssImg(row.goods_img, 60)" />
-                                <div class="pl10px">
-                                    <NuxtLink class="goods-link" :to="`/goods/${row.goods_sn}`" target="_blank">
-                                        {{ row.goods_name }}
-                                    </NuxtLink>
-                                </div>
-                            </div>
-                        </template>
-                    </el-table-column>
-                    <!-- <el-table-column prop="goods_code" label="商品型号" width="160" />
-                <el-table-column prop="goods_spec" label="商品规格" width="160" /> -->
-                    <el-table-column prop="price" label="商品价格" width="120" />
-                    <el-table-column prop="goods_number" label="购买数量" width="100" align="center">
-                        <template #default="{ row }">
-                            <b>{{ row.goods_number }}</b>
-                        </template>
-                    </el-table-column>
-                    <el-table-column prop="total" label="小计" width="110">
-                        <template #default="{ row }">
-                            <b>{{ formatNumber(row.price * row.goods_number) }}</b>
-                        </template>
-                    </el-table-column>
-                </el-table>
-                <ul class="prefer-ul pt5px">
-                    <li>
-                        <span class="item-title">商品总件数：</span>
-                        <span class="item-text">{{ orderInfo?.total_number }}件</span>
-                    </li>
-                    <li>
-                        <span class="item-title">商品总金额：</span>
-                        <span class="item-text">￥{{ orderInfo?.total_price }}</span>
-                    </li>
-                    <li>
-                        <span class="item-title">运费<i>(明细)</i>：</span>
-                        <span class="item-text">￥{{ orderInfo?.freight_price }}</span>
-                    </li>
-                    <li>
-                        <span class="item-title">优惠券抵扣金额：</span>
-                        <span class="item-text">-￥{{ formatNumber(setPreferMoney) }}</span>
-                    </li>
-                    <li>
-                        <span class="item-title">工游豆抵扣金额：</span>
-                        <span class="item-text">-￥{{ orderInfo?.peas_price }}</span>
-                    </li>
-                    <li>
-                        <span class="item-title">实付金额：</span>
-                        <span class="item-text color-primary text-18px font-bold">￥{{ orderInfo?.meet_price
-                        }}</span>
-                    </li>
-                </ul>
-            </div>
-            <OrderInvoiceModel ref="invoiceRef" />
-        </el-skeleton>
-    </LayoutUser>
-</template>
-
 <script lang="ts" setup>
 import { OrderInvoiceModel } from '#components'
 import { OrderApi, OrderInvoiceApi } from '~/api/goods/order'
@@ -326,6 +134,198 @@ definePageMeta({
     middleware: 'auth',
 })
 </script>
+
+<template>
+    <LayoutUser>
+        <el-skeleton :loading="defData.skeleton" animated>
+            <template #template>
+                <div class="pb15px">
+                    <el-skeleton-item class="w20%!" />
+                </div>
+                <div class="mb20px border-1 p20px">
+                    <el-skeleton />
+                </div>
+                <div class="mb20px border-1 p20px">
+                    <el-skeleton />
+                </div>
+                <div class="min-h300px border-1 p20px">
+                    <el-skeleton />
+                </div>
+            </template>
+            <el-breadcrumb class="mb20px">
+                <el-breadcrumb-item v-for="item in breadcrumbData" :key="item.id" :to="item.href">
+                    {{ item.text }}
+                </el-breadcrumb-item>
+            </el-breadcrumb>
+            <div class="mb20px border-1 p20px">
+                <div class="order-top mb20px min-h40px">
+                    <div class="lt">
+                        <span class="mr20px">订单号：<b>{{ order_no }}</b></span>
+                        <span>订单状态：
+                            <el-text class="font-bold" size="large" :type="orderState.type"
+                                :style="`color: ${orderState.color};`">
+                                {{ orderState.text }}
+                            </el-text>
+                        </span>
+                        <div v-if="orderInfo?.order_status === 1" class="mt10px">
+                            您的订单已提交成功，请尽快完成付款哦！
+                            <el-countdown v-if="orderInfo?.pay_type === 3" format="[剩余]DD[天]HH[时]mm[分]ss[秒]"
+                                :value="setEndTime()" value-style="font-size:13px;color:#f00;" @finish="onFinish()" />
+                        </div>
+                    </div>
+                    <div class="gt">
+                        <OrderOperate class="order-ope"
+                            :data="{ order_no, status: orderInfo!.order_status, bill_status: orderInfo!.bill_status, is_return: orderInfo!.is_refund }"
+                            @update="updateOrder" />
+                    </div>
+                </div>
+                <div class="bane-item">
+                    <lazy-el-steps class="step-box" :active="stepSelect" finish-status="success">
+                        <el-step v-for="(item, index) in orderInfo?.status_info" :key="index" :title="item.text"
+                            :description="item.time" />
+                    </lazy-el-steps>
+                </div>
+            </div>
+            <div class="mb20px border-1 p20px">
+                <div class="tle mb10px text-15px c-#222 font-600">
+                    订单信息
+                </div>
+                <ul class="collect-item">
+                    <!-- 下单时间：2023-05-30 13:18:38
+                <li>
+                    <div class="lt">
+                        下单时间：
+                    </div>
+                    <div class="gt">
+                        {{ orderInfo?.cerate_time }}
+                    </div>
+                </li> -->
+
+                    <li>
+                        <div class="lt">
+                            收货信息：
+                        </div>
+                        <div class="gt">
+                            <div>{{ orderInfo?.consignee_name }}&emsp;{{ orderInfo?.consignee_phone }}</div>
+                            <el-text> {{ addressText }} </el-text>
+                            <span class="ml8px text-12px c-#999"> 收货信息有误？请立即联系客服修改</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            备注信息：
+                        </div>
+                        <div class="gt">
+                            {{ orderInfo?.remarks }}
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            配送方式：
+                        </div>
+                        <div class="gt">
+                            <div v-for="(item, index) in logisticsList" :key="index">
+                                {{ item.logistics_name }} <span class="mr20px opacity-80">({{ item.logistics_no }})</span>
+                                <span class="c-#666">发货时间：{{ item.create_time }}</span>
+
+                                <span class="ml25px c-#222">{{ item.goods_name }}</span>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            支付方式：
+                        </div>
+                        <div class="gt">
+                            <span v-if="orderInfo?.pay_type === 1">微信支付</span>
+                            <span v-else-if="orderInfo?.pay_type === 2">支付宝支付</span>
+                            <span v-else-if="orderInfo?.pay_type === 3" class="color-warning">线下支付</span>
+                            <span v-else>--</span>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="lt">
+                            支付时间：
+                        </div>
+                        <div class="gt">
+                            {{ orderInfo?.pay_time }}
+                        </div>
+                    </li>
+                    <li v-if="orderInfo!.bill_status">
+                        <div class="lt">
+                            发票信息：
+                        </div>
+                        <div class="gt">
+                            <el-link style="--el-link-font-size:13px;" @click="onInvoiceDetail">
+                                <i class="i-ep-view inline-block" />查看
+                            </el-link>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="mb10px border-1 p20px">
+                <div class="tle mb10px text-15px c-#222 font-600">
+                    商品信息
+                </div>
+                <el-table :data="orderInfo?.goods_list" border>
+                    <el-table-column prop="goods_name" label="商品名称" min-width="180">
+                        <template #default="{ row }">
+                            <div class="h50px flex items-center">
+                                <CoImage class="h50px w50px" :src="setGoodsOssImg(row.goods_img, 60)" />
+                                <div class="pl10px">
+                                    <NuxtLink class="goods-link" :to="`/goods/${row.goods_sn}`" target="_blank">
+                                        {{ row.goods_name }}
+                                    </NuxtLink>
+                                </div>
+                            </div>
+                        </template>
+                    </el-table-column>
+                    <!-- <el-table-column prop="goods_code" label="商品型号" width="160" />
+                <el-table-column prop="goods_spec" label="商品规格" width="160" /> -->
+                    <el-table-column prop="price" label="商品价格" width="120" />
+                    <el-table-column prop="goods_number" label="购买数量" width="100" align="center">
+                        <template #default="{ row }">
+                            <b>{{ row.goods_number }}</b>
+                        </template>
+                    </el-table-column>
+                    <el-table-column prop="total" label="小计" width="110">
+                        <template #default="{ row }">
+                            <b>{{ formatNumber(row.price * row.goods_number) }}</b>
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <ul class="prefer-ul pt5px">
+                    <li>
+                        <span class="item-title">商品总件数：</span>
+                        <span class="item-text">{{ orderInfo?.total_number }}件</span>
+                    </li>
+                    <li>
+                        <span class="item-title">商品总金额：</span>
+                        <span class="item-text">￥{{ orderInfo?.total_price }}</span>
+                    </li>
+                    <li>
+                        <span class="item-title">运费<i>(明细)</i>：</span>
+                        <span class="item-text">￥{{ orderInfo?.freight_price }}</span>
+                    </li>
+                    <li>
+                        <span class="item-title">优惠券抵扣金额：</span>
+                        <span class="item-text">-￥{{ formatNumber(setPreferMoney) }}</span>
+                    </li>
+                    <li>
+                        <span class="item-title">工游豆抵扣金额：</span>
+                        <span class="item-text">-￥{{ orderInfo?.peas_price }}</span>
+                    </li>
+                    <li>
+                        <span class="item-title">实付金额：</span>
+                        <span class="item-text color-primary text-18px font-bold">￥{{ orderInfo?.meet_price
+                        }}</span>
+                    </li>
+                </ul>
+            </div>
+            <OrderInvoiceModel ref="invoiceRef" />
+        </el-skeleton>
+    </LayoutUser>
+</template>
 
 <style lang="scss" scoped>
 .order-top {

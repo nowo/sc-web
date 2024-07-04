@@ -1,4 +1,36 @@
 <!-- 商品分类 -->
+<script lang="ts" setup>
+import { GoodsApi } from '~/api/goods/list'
+
+// const goodsState = useGoodsState()
+
+// 设置图标
+const eleIconChange = (icon: string) => {
+    if (!icon.includes('ele-')) return ''
+    const str = icon.split('-')?.[1]
+
+    if (str) {
+        let a = ''
+        const arr = str.split('')
+        arr.forEach((item) => {
+            if (item >= 'A' && item <= 'Z') {
+                a += `-${item.toLowerCase()}`
+            } else {
+                a += item
+            }
+        })
+        return `i-ep${a}`
+    } else {
+        return ''
+    }
+}
+
+// 获取商品分类
+const { data: cate } = await GoodsApi.getIndexClass()
+const cateList = computed(() => cate.value?.data ?? [])
+//
+</script>
+
 <template>
     <div class="goods-class-tle">
         <!-- <i class="i-carbon-list" /> -->
@@ -49,38 +81,6 @@
         </ul>
     </div>
 </template>
-
-<script lang="ts" setup>
-import { GoodsApi } from '~/api/goods/list'
-
-// const goodsState = useGoodsState()
-
-// 设置图标
-const eleIconChange = (icon: string) => {
-    if (!icon.includes('ele-')) return ''
-    const str = icon.split('-')?.[1]
-
-    if (str) {
-        let a = ''
-        const arr = str.split('')
-        arr.forEach((item) => {
-            if (item >= 'A' && item <= 'Z') {
-                a += `-${item.toLowerCase()}`
-            } else {
-                a += item
-            }
-        })
-        return `i-ep${a}`
-    } else {
-        return ''
-    }
-}
-
-// 获取商品分类
-const { data: cate } = await GoodsApi.getIndexClass()
-const cateList = computed(() => cate.value?.data ?? [])
-//
-</script>
 
 <style lang="scss" scoped>
 .goods-class-tle {
