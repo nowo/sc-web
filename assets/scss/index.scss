@@ -1,0 +1,85 @@
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    /*设置滚动条颜色*/
+    scrollbar-color: #ccc #eee;
+    /*去掉三角(滚动条宽度为8px)*/
+    scrollbar-width: thin;
+    /*隐藏滚动条（可以滚动）*/
+    /* scrollbar-width: none; */
+}
+
+::-webkit-scrollbar {
+    /*Chrome下隐藏滚动条（宽度设为0即可）*/
+    width: 10px;
+    height: 10px;
+    background: #eee;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    opacity: 0.5;
+    -webkit-box-shadow: inset 0 0 2px 2px #ccc;
+    box-shadow: inset 0 0 2px 2px #ccc;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+// 选中
+::selection {
+    background: var(--el-color-primary);
+    color: var(--el-color-white);
+}
+
+:root {
+    --m-container-width: 1200px;
+    --m-color-white: #fff;
+    --m-body-bg-color: #f3f3f3;
+    --m-aside-width: 230px;
+    --co-image-error-size: 36px;
+}
+
+body {
+    background-color: var(--m-body-bg-color);
+    min-width: var(--m-container-width) !important;
+}
+
+.container {
+    width: var(--m-container-width) !important;
+    max-width: var(--m-container-width) !important;
+    padding: 0 10px;
+    margin: 0 auto;
+}
+
+.over-clamp {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+
+.color-primary {
+    color: var(--el-color-primary)
+}
+
+.color-success {
+    color: var(--el-color-success)
+}
+
+.color-danger {
+    color: var(--el-color-danger)
+}
+
+.color-info {
+    color: var(--el-color-info)
+}
+
+.color-warning {
+    color: var(--el-color-warning)
+}
