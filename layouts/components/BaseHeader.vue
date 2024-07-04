@@ -9,9 +9,10 @@
                 </div>
                 <div class="search-box relative w50%">
                     <client-only>
-                        <ElAutocomplete ref="autocompleteRef" v-model="search.keyword" :fetch-suggestions="querySearchAsync"
-                            popper-class="pop-search" class="w100%" :debounce="800" fit-input-width placeholder=""
-                            select-when-unmatched label="test" @select="onSearch">
+                        <ElAutocomplete ref="autocompleteRef" v-model="search.keyword"
+                            :fetch-suggestions="querySearchAsync" popper-class="pop-search" class="w100%"
+                            :debounce="800" fit-input-width placeholder="" select-when-unmatched label="test"
+                            @select="onSearch">
                             <template #prefix>
                                 <i class="i-ep-search" />
                             </template>
@@ -53,17 +54,23 @@
 
                     <div v-if="searchHotList.length" class="search-hot">
                         热门搜索：<span v-for="(item) in searchHotList" :key="item" @click="onSearchHot(item)">{{ item
-                        }}</span>
+                            }}</span>
                     </div>
                 </div>
                 <div class="cart">
-                    <NuxtLink to="/order/cart">
+                    <!-- <NuxtLink to="/order/cart">
                         <el-badge :value="number" class="cart-number">
                             <el-button type="primary" class="min-w150px">
                                 <i class="i-ep-shopping-cart-full mr8px" />
                                 购物车
                             </el-button>
                         </el-badge>
+                    </NuxtLink> -->
+                    <NuxtLink to="/order/history">
+                        <el-button type="primary" class="min-w150px">
+                            <i class="i-ep-shopping-cart-full mr8px" />
+                            历史记录
+                        </el-button>
                     </NuxtLink>
                 </div>
             </div>

@@ -1,14 +1,14 @@
 <template>
     <div class="fixed-box">
         <ul class="side-ul">
-            <li>
+            <!-- <li>
                 <NuxtLink class="side-item" to="https://w1011.ttkefu.com/k/linkurl/?t=3G6FHI1" target="_blank">
                     <i class="i-ep-service" />
                     <p class="text">
                         客服
                     </p>
                 </NuxtLink>
-            </li>
+            </li> -->
             <li>
                 <NuxtLink class="side-item" to="/order/list">
                     <i class="i-ep-user-filled" />
@@ -17,13 +17,21 @@
                     </p>
                 </NuxtLink>
             </li>
-            <li>
+            <!-- <li>
                 <NuxtLink class="side-item cart-num" to="/order/cart">
                     <i class="i-ic-twotone-shopping-cart" />
                     <p class="text">
                         购物车
                     </p>
                     <span v-if="number" class="n">{{ number }}</span>
+                </NuxtLink>
+            </li> -->
+            <li>
+                <NuxtLink class="side-item" to="/user/collect">
+                    <i class="i-carbon-favorite-filled" />
+                    <p class="text">
+                        我的收藏
+                    </p>
                 </NuxtLink>
             </li>
             <li>
@@ -88,6 +96,9 @@ const number = await useCartNumber.setCartNumber()
         &:hover {
             background-color: var(--el-color-primary);
             color: var(--el-color-white);
+            i{
+                color: var(--el-color-white);
+            }
         }
 
         &-top {
@@ -98,6 +109,7 @@ const number = await useCartNumber.setCartNumber()
 
         i {
             font-size: 18px;
+            color: var(--el-color-primary-light-3);
         }
     }
 

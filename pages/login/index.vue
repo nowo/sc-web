@@ -1,50 +1,26 @@
 <template>
-    <div class="center flex items-center justify-center">
-        <div v-if="defData.type === 4" class="login">
-            <el-icon style="float: right;margin: 5px;" @click="defData.type = 1">
-                <Close />
-            </el-icon>
-            <iframe id="iframe" class="ml40px h400px w300px" :src="weChat" />
-        </div>
-        <div v-else class="login">
-            <div v-if="defData.type !== 3">
-                <el-row>
-                    <el-col :span="6" />
-                    <el-col :span="6">
-                        <div class="title" @click="loginClick">
-                            账号登录 |
-                        </div>
-                    </el-col>
-                    <el-col :span="6">
-                        <div class="title" @click="validateClick">
-                            验证码登录
-                        </div>
-                    </el-col>
-                </el-row>
+    <div class="login-page flex items-center justify-center">
+        <div class="login">
+            <div class="text-center text-20px font-bold mb20px color-#333">
+                账号登录
             </div>
-            <div v-else>
-                <el-row>
-                    <el-col :span="8" />
-                    <el-col :span="8">
-                        <div class="title">
-                            绑定手机号
-                        </div>
-                    </el-col>
-                    <el-col :span="8" />
-                    <el-col :span="2" />
-                    <el-col :span="8">
-                        <div style="color: red;">
-                            手机号未绑定
-                        </div>
-                    </el-col>
-                </el-row>
-            </div>
-            <el-form ref="formRef" label-width="40px" :rules="rules" :model="form" style="max-width: 330px" size="large">
+
+            <el-form ref="formRef" label-width="auto" :rules="rules" :model="form" size="large">
                 <el-form-item prop="phone">
-                    <el-input v-model="form.phone" placeholder="请输入手机号" :prefix-icon="User" />
+                    <el-input v-model="form.phone" placeholder="请输入手机号">
+                        <template #prefix>
+                            <i class=" i-ep-user">
+                            </i>
+                        </template>
+                    </el-input>
                 </el-form-item>
                 <el-form-item v-if="defData.type === 1" prop="password">
-                    <el-input v-model="form.password" placeholder="请输入密码" show-password :prefix-icon="Lock" />
+                    <el-input v-model="form.password" placeholder="请输入密码" show-password>
+                        <template #prefix>
+                            <i class=" i-ep-lock">
+                            </i>
+                        </template>
+                    </el-input>
                 </el-form-item>
                 <el-form-item v-else prop="validate_code">
                     <el-col :span="15">
@@ -61,47 +37,27 @@
                         </el-button>
                     </el-col>
                 </el-form-item>
-                <el-form-item v-if="defData.type !== 3">
-                    <el-button class="w300px" :loading="form.loading" @click="onClick">
-                        登 录
-                    </el-button>
-                </el-form-item>
-                <el-form-item v-else>
-                    <el-button class="w300px" :loading="form.loading" @click="onClick">
-                        进入工游记
+                <el-form-item>
+                    <el-button class="w100% mt10px" :loading="form.loading"  type="primary" plain @click="onClick">
+                        {{ defData.type !== 3 ? '登 录' : '进入工游记' }}
                     </el-button>
                 </el-form-item>
             </el-form>
-            <el-row>
-                <el-col :span="2" />
-                <el-col :span="14">
-                    <NuxtLink to="/login/register">
-                        立即注册
-                    </NuxtLink>
-                </el-col>
-                <el-col :span="8">
-                    <NuxtLink to="/login/forgotPassword">
-                        忘记密码?
-                    </NuxtLink>
-                </el-col>
-                <el-col :span="2" />
-                <el-col :span="10">
-                    <div class="mt-5px flex items-center">
-                        <span class="mr5px">第三方：</span>
-                        <!-- <i class="i-ic-baseline-wechat cursor-pointer text-24px c-#2ec100" @click="weChatLogin" /> -->
-                        <div class="we-chart cursor-pointer" @click="weChatLogin">
-                            <i class="i-ic-baseline-wechat text-24px c-#fff" />
-                        </div>
-                    </div>
-                </el-col>
-            </el-row>
+            <div class="flex justify-between mt-10px">
+                <NuxtLink to="/login/register">
+                    立即注册
+                </NuxtLink>
+                <NuxtLink to="/login/forgotPassword">
+                    忘记密码?
+                </NuxtLink>
+            </div>
+
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
-import { Close, Lock, User } from '@element-plus/icons-vue'
 
 // import Big from 'big.js'
 import { LoginApi } from '~/api/login'
@@ -150,8 +106,8 @@ const onClick = async () => {
     // const num = Big(0.1).plus(0.2)
     // console.log('Big(0.7).plus(x).plus(y)  :>> ', num, num.toNumber()) // )
 
-    const isRun = await formRef.value?.validate((valid, _fields) => !!valid)
-    if (!isRun) return
+    const isVerify = await useFormVerify(formRef.value)
+    if (!isVerify) return
     form.loading = true
     if (defData.type === 1) { // 账号登录
         const data: LoginApi_Login = {
@@ -269,11 +225,8 @@ getOpenId()
 </script>
 
 <style lang="scss" scoped>
-body {
-    margin: 0;
-}
 
-.center {
+.login-page {
     width: 100%;
     height: 700px;
     background-image: url('assets/images/login-bg.png');
@@ -283,47 +236,11 @@ body {
 }
 
 .login {
-    width: 390px;
-    height: 400px;
+    width: 370px;
     background-color: rgb(255, 255, 255);
     border-radius: 5px;
     margin-top: -115px;
+    padding: 40px 35px;
 }
 
-.title {
-    font-size: large;
-    text-align: center;
-    height: 70px;
-    padding-top: 20px;
-    color: #000;
-}
-
-.el-row {
-    margin-bottom: 20px;
-}
-
-.el-row:last-child {
-    margin-bottom: 0;
-}
-
-.el-col {
-    border-radius: 4px;
-}
-
-.grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-}
-
-.we-chart {
-    height: 35px;
-    width: 35px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    --un-bg-opacity: 1;
-    background-color: rgba(46, 193, 0, var(--un-bg-opacity));
-
-}
 </style>

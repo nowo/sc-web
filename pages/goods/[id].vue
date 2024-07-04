@@ -59,8 +59,7 @@
                                     </div>
                                 </div>
                             </li>
-                            <!---->
-                            <li v-if="!userData?.attest_status" class="items-center bg-#f8f8f8 -mt10px">
+                            <!-- <li v-if="!userData?.attest_status" class="items-center bg-#f8f8f8 -mt10px">
                                 <div class="lt" />
                                 <div class="gt">
                                     <span class="price3" @click="onApprove">
@@ -69,14 +68,14 @@
                                     </span>
                                     <span class="text-12px c-#666">会员价</span>
                                 </div>
-                            </li>
-                            <li v-if="goodsData.goodsInfo?.coupon_list?.length" class="bg-#f8f8f8">
+                            </li> -->
+                            <li v-if="goodsData.goodsInfo?.coupon_list?.length&&false" class="bg-#f8f8f8">
                                 <div class="lt">
                                     优惠券
                                 </div>
                                 <div class="gt">
                                     <!-- 未登录禁止领取 -->
-                                    <el-popover v-for="item in goodsData.goodsInfo.coupon_list.slice(0, 5)"
+                                    <el-popover v-for="item in goodsData.goodsInfo?.coupon_list?.slice(0, 5)"
                                         :key="item.coupon_id" placement="top" :width="75"
                                         :popper-style="{ minWidth: '75px' }" trigger="hover"
                                         :disabled="userData?.user_id ? false : true">
@@ -99,7 +98,7 @@
                             <li class="items-center bg-#f8f8f8 -mt10px">
                                 <div class="lt" />
                                 <div class="gt my5px">
-                                    <el-tag v-if="goodsData.goodsInfo?.is_best" type="" effect="dark" size="small"
+                                    <el-tag v-if="goodsData.goodsInfo?.is_best" type="primary" effect="dark" size="small"
                                         class="mr5px">
                                         精选
                                     </el-tag>
@@ -129,7 +128,7 @@
                                     {{ goodsData.goodsInfo?.goods_code }}
                                 </div>
                             </li>
-                            <li>
+                            <!-- <li>
                                 <div class="lt">
                                     支付方式
                                 </div>
@@ -139,7 +138,6 @@
                                         微信
                                     </el-button>
                                     <el-button text bg size="small" class="cursor-default!">
-                                        <!-- <i class="i-ic-baseline-payment mr3px c-#3887ff" /> -->
                                         <i class="i-ri-alipay-fill mr3px c-#3887ff" />
                                         支付宝
                                     </el-button>
@@ -157,31 +155,31 @@
                                     <el-input-number v-model="form.number" :min="1" :max="9999" />
                                     <span class="ml5px c-#aaa">起购量:1个</span>
                                 </div>
-                            </li>
+                            </li> -->
                             <li class="my8px b-t b-t-dashed">
                                 <!--  -->
                             </li>
                             <li>
                                 <div class="lt" />
                                 <div class="gt">
-                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" text bg size="small"
+                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" text bg size="large"
                                         @click="onCollect">
                                         <i class="i-carbon-favorite-filled mr3px" />
                                         收藏
                                     </el-button>
-                                    <el-button v-else text bg size="small" @click="onCollect">
+                                    <el-button v-else text bg size="large" @click="onCollect">
                                         <i class="i-carbon-favorite mr3px" />
                                         收藏
                                     </el-button>
-                                    <el-button text bg size="small" @click="onShare">
+                                    <!-- <el-button text bg size="small" @click="onShare">
                                         <i class="i-ep-share mr3px" />
                                         分享
-                                    </el-button>
+                                    </el-button> -->
                                 </div>
                             </li>
-                            <li class="buy-item">
+                            <!-- <li class="buy-item">
                                 <div class="lt">
-                                    <!-- 购买数量 -->
+                                    
                                 </div>
                                 <div class="gt">
                                     <el-button type="primary" size="large" @click="onBuyGoods">
@@ -192,7 +190,7 @@
                                         加入购物车
                                     </el-button>
                                 </div>
-                            </li>
+                            </li> -->
                         </ul>
                     </div>
                     <div class="goods-right">

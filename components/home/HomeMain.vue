@@ -21,10 +21,10 @@
                         <h3 class="tle hov-name">
                             {{ item.goods_name }}
                         </h3>
-                        <div class="price">
+                        <!-- <div class="price">
                             <span>惊爆价</span>
                             <em>￥{{ item.shop_price }}</em>
-                        </div>
+                        </div> -->
                     </NuxtLink>
                 </div>
             </div>
@@ -58,10 +58,10 @@
                                         <h3 class="hov-name goods-name">
                                             {{ son.goods_name }}
                                         </h3>
-                                        <div class="color-primary truncate">
+                                        <!-- <div class="color-primary truncate">
                                             <span class="text-14px">￥</span>
                                             <span class="font-bold">{{ son.shop_price }}</span>
-                                        </div>
+                                        </div> -->
                                     </NuxtLink>
                                 </li>
                             </ul>
