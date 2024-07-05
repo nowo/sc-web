@@ -34,9 +34,11 @@ const { data: goods } = await HomeApi.getNewGoods()
 
 // 只显示前五个（下标0开始，截取5个）
 const goodsList = computed(() => {
-    const list = goods.value?.data.lists.slice(0, 5).map((item) => {
-        item.goods_img = setGoodsOssImg(item.goods_img, 200)
-        return item
+    const list = goods.value?.data?.lists?.slice(0, 5)?.map((item) => {
+        return {
+            ...item,
+            goods_img:setGoodsOssImg(item.goods_img, 200)
+        }
     })
     return list || []
 })
@@ -51,18 +53,19 @@ onMounted(async () => {
     <div class="container">
         <div ref="goodsBestRef" />
         <client-only>
-            <div v-if="goodsList.length" class="goods-best">
-                <div class="goods-best-tle">
-                    <div class="lt">
-                        新品优选<sub>明星产品，趋势热销</sub>
-                    </div>
-                    <NuxtLink :to="linkGoodsList({ query: {}, url: true })">
-                        <el-button link>
-                            更多
-                            <i class="i-ep-arrow-right" />
-                        </el-button>
-                    </NuxtLink>
+        <div v-if="goodsList.length" class="goods-best">
+            <div class="goods-best-tle">
+                <div class="lt">
+                    新品优选<sub>明星产品，趋势热销</sub>
                 </div>
+                <NuxtLink :to="linkGoodsList({ query: {}, url: true })">
+                    <el-button link>
+                        更多
+                        <i class="i-ep-arrow-right" />
+                    </el-button>
+                </NuxtLink>
+            </div>
+            
                 <div class="goods-best-list">
                     <NuxtLink v-for="item in goodsList" :key="item.goods_id" class="v1 goods-link"
                         :to="`/goods/${item.goods_sn}`">
@@ -76,10 +79,11 @@ onMounted(async () => {
                         </div> -->
                     </NuxtLink>
                 </div>
-            </div>
-        </client-only>
+            
+        </div></client-only>
         <div ref="floorRef" class="floor-box">
-            <div v-for="(item, index) in floorList" :id="`fl${item.storey_id}`" :key="item.storey_id" class="floor-item">
+            <div v-for="(item, index) in floorList" :id="`fl${item.storey_id}`" :key="item.storey_id"
+                class="floor-item">
                 <div class="left" :style="`background-image: url(${item.storey_img || ''});`">
                     <h3 class="tle">
                         {{ item.storey_name }}
@@ -120,8 +124,8 @@ onMounted(async () => {
                 <div class="brand-list">
                     <NuxtLink v-for="sub in item.brand_lists.slice(0, 8)" :key="sub.brand_id"
                         :to="linkGoodsList({ query: { bid: sub.brand_id }, url: true })">
-                        <CoImage class="w100% pb45% block!" :src="sub.brand_logo" style="--el-color-info-light-9:#282828;"
-                            :icon-size="28" :alt="sub.brand_name" />
+                        <CoImage class="w100% pb45% block!" :src="sub.brand_logo"
+                            style="--el-color-info-light-9:#282828;" :icon-size="28" :alt="sub.brand_name" />
                     </NuxtLink>
                 </div>
             </div>

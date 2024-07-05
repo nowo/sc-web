@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
-import { CommonApi } from '~/api/common'
+import { requestRegionList } from '~/api/common'
 import { LoginApi } from '~/api/login'
 import { SaleAfterApi } from '~/api/user/saleAfter'
 
@@ -53,18 +53,18 @@ const defData = reactive({
 
 // 获取省市区数据
 const initDefaultData = async () => {
-    const { data } = await CommonApi.getAllRegion()
+    const { data } = await requestRegionList()
     if (data.value?.code === 200) {
         defData.addressList = data.value.data
     } else {
-        ElMessage.error(data.value?.msg) // 提示信息或页面加载不当会引发任何内容。
+        ElMessage.error(data.value?.msg) 
     }
 }
 initDefaultData()
 
 // 获取短信验证码
 const getCodeClick = async () => {
-    if (!form.data.phone) ElMessage.error('请先输入手机号码')
+    if (!form.data.phone) ElMessage.warning('请先输入手机号码')
 
     const data: LoginApi_validateCode = {
         type: 6,

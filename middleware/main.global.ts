@@ -5,4 +5,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     if (import.meta.client && !!Number(system.value?.shop_status)) {
         if (to.name !== 'close') return navigateTo('/close')
     }
+console.log(to)
+    if(to.path.startsWith('/order')) return navigateTo('/404')
 })

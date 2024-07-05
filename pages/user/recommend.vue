@@ -31,7 +31,7 @@ const onShare = async () => {
             defData.shareCode = await QRCode.toDataURL(defData.shareLink)
         }
     } else {
-        ElMessage.error('请先登录')
+        ElMessage.warning('请先登录')
     }
 }
 onShare()

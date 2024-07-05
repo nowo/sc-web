@@ -11,6 +11,11 @@ import { CouponApi } from '~/api/user/coupon'
 const { x, y } = useMouse() // 鼠标位置函数用于获取当前鼠标位置
 
 const formRef = ref<FormInstance>()
+
+// 获取商城信息
+const useSystem = useSystemState()
+const systemInfo = await useSystem.getSystemInfo()
+
 const userState = useUserState()
 // 登录用户
 const userData = await userState.getUserInfo()
@@ -47,14 +52,19 @@ const form = reactive({
 const param_id = useRouteParam('id')
 
 const goods_sn = param_id.value?.trim() ?? ''
-console.warn(goods_sn)
-// if (!goods_sn) return ElMessage.error('未获取到商品信息,请检查地址是否正确')
+// console.warn(goods_sn)
 
-const { data, error } = await GoodsApi.getInfo({ goods_sn })
+const { data, error, status } = await GoodsApi.getInfo({ goods_sn })
 
 // 商品信息
 const goodsData = computed(() => {
-    const goodsInfo = data.value?.data?.goods_info
+
+    const goodsInfo = {
+        ...data.value?.data?.goods_info,
+        cat_name: data.value?.data.cat_name,
+        brand_name: data.value?.data.brand_name,
+    }
+
     const id = data.value?.data?.goods_info.goods_id || 0
     const photoList: string[] = goodsInfo?.goods_img ? [goodsInfo?.goods_img] : []
 
@@ -86,48 +96,7 @@ if (data.value?.data?.goods_info) {
 
 // 获取商品信息
 const initGoodsData = async () => {
-    // const goods_sn = param_id.value?.trim() ?? ''
-    // if (!goods_sn) return ElMessage.error('未获取到商品信息,请检查地址是否正确')
 
-    // const { data, error } = await GoodsApi.getInfo({ goods_sn })
-    // await wait(450)
-    // if (error.value) return ElMessage.error('网络错误!')
-    // if (data.value?.code === 200) {
-    //     const dat = data.value.data
-    //     // console.log(dat)
-    //     const infoData = dat.goods_info
-
-    //     // if (goods.goods_id === id) {
-    //     if (infoData) {
-    //         goodsData.value = dat
-    //         goodsInfo.value = infoData
-
-    //         defData.goods_id = infoData.goods_id
-
-    //         // 商品图片
-    //         const imgArr: string[] = infoData.goods_img ? [infoData.goods_img] : []
-    //         dat.photo_lists.forEach((item) => {
-    //             if (item.photo_url) imgArr.push(item.photo_url)
-    //         })
-    //         goodsImgList.value = imgArr
-
-    //         // 设置seo
-    //         const meta = []
-    //         if (infoData.web_desc) meta.push({ name: 'description', content: infoData.web_desc })
-    //         if (infoData.web_keywords) meta.push({ name: 'keywords', content: infoData.web_keywords })
-    //         useHead({
-    //             title: infoData.web_title || infoData.goods_name,
-    //             meta,
-    //         })
-
-    //         defData.skeleton = false // 关闭骨架屏
-    //     } else {
-    //         ElMessage.error('未获取到商品信息,请检查地址是否正确')
-    //         // navigateTo('/404')
-    //     }
-    // } else {
-    //     ElMessage.error('未获取到商品信息,请检查地址是否正确')
-    // }
 }
 
 // 问答列表 弹窗标题
@@ -170,7 +139,7 @@ const onAnswer = async (row: any) => {
 // 发布提问 / 回答
 const answerClick = async () => {
     if (defData.type === 1) { // 提问
-        if (!form.question) return ElMessage.error('请先输入提问')
+        if (!form.question) return ElMessage.warning('请先输入问题')
         const info: InterListApi_addList = {
             goods_id: goodsData.value.id,
             type: 1,
@@ -185,7 +154,7 @@ const answerClick = async () => {
         ElMessage.success('发布成功')
         form.question = ''
     } else { // 回答
-        if (!form.answer) return ElMessage.error('请输入回答')
+        if (!form.answer) return ElMessage.warning('请输入回答')
         const info: InterListApi_addList = {
             goods_id: goodsData.value.id,
             type: 2,
@@ -256,11 +225,11 @@ const onCollect = async () => {
 
 // 立即购买
 const onBuyGoods = () => {
-    if (!goodsData.value.goodsInfo?.is_sale) return ElMessage.error('商品已下架')
+    if (!goodsData.value.goodsInfo?.is_sale) return ElMessage.warning('商品已下架')
 
     const price = goodsData.value.goodsInfo?.shop_price || ''
     if (Number(price) <= 0) {
-        return ElMessage.error('商品价格不正确')
+        return ElMessage.warning('商品价格不正确')
     }
     const param = {
         goods_id: goodsData.value.id,
@@ -275,15 +244,15 @@ const onBuyGoods = () => {
 
 // 加入购物车
 const onAddCart = async () => {
-    if (!goodsData.value.goodsInfo?.is_sale) return ElMessage.error('商品已下架')
+    if (!goodsData.value.goodsInfo?.is_sale) return ElMessage.warning('商品已下架')
     // 用户未登录时，不允许加入购物车页面
     if (!userState.token.value) {
-        ElMessage.error('请先登录!')
+        ElMessage.warning('请先登录!')
         return navigateTo('/login')
     }
     const price = goodsData.value.goodsInfo?.shop_price || ''
     if (Number(price) <= 0) {
-        return ElMessage.error('商品价格不正确')
+        return ElMessage.warning('商品价格不正确')
     }
 
     const { number } = form
@@ -299,7 +268,7 @@ const onAddCart = async () => {
             ElMessage.error(data.value?.msg || '加入购物车失败')
         }
     } else {
-        ElMessage.error('购买数量不能为0')
+        ElMessage.warning('购买数量不能为0')
     }
 }
 
@@ -443,13 +412,25 @@ const onHistory = async () => {
 }
 
 initGoodsData()
-
-watch(() => goodsData.value.id, async (val) => {
-    if (val) {
-        await wait(150)
-        defData.skeleton = false
-    }
+// watch(()=>status.value, async (val) => {
+//     console.log(val)
+//     // if (val) {
+//     //     await wait(150)
+//     //     defData.skeleton = false
+//     // }
+// })
+watchEffect(async () => {
+    console.warn('status', status.value)
+    await wait(100)
+    defData.skeleton = false
 })
+// watch(() => goodsData.value.id, async (val) => {
+//     console.log(val)
+//     if (val) {
+//         await wait(150)
+//         defData.skeleton = false
+//     }
+// })
 
 onMounted(() => {
     onHistory()
@@ -463,6 +444,7 @@ definePageMeta({
 <template>
     <section class="goods-detail">
         <div class="container">
+            <!--   status!='success'-->
             <el-skeleton :loading="defData.skeleton" animated>
                 <template #template>
                     <div class="my15px">
@@ -513,7 +495,17 @@ definePageMeta({
                                     价格
                                 </div>
                                 <div class="gt">
-                                    <div class="price1">
+                                    <div class="flex">
+                                        <el-popover placement="right" title="联系方式" :width="200" trigger="hover"
+                                            :content="systemInfo?.sale_tel">
+                                            <template #reference>
+                                                <el-alert class="w-auto!" title="联系客服人员获取报价信息>>" type="warning"
+                                                    :closable="false" />
+
+                                            </template>
+                                        </el-popover>
+                                    </div>
+                                    <div v-if="0" class="price1">
                                         <b>￥{{ goodsData.goodsInfo?.shop_price }}
                                             <!-- <span v-if="goodsInfo?.unit">/{{ goodsInfo?.unit}}</span> -->
                                         </b>
@@ -560,8 +552,8 @@ definePageMeta({
                             <li class="items-center bg-#f8f8f8 -mt10px">
                                 <div class="lt" />
                                 <div class="gt my5px">
-                                    <el-tag v-if="goodsData.goodsInfo?.is_best" type="primary" effect="dark" size="small"
-                                        class="mr5px">
+                                    <el-tag v-if="goodsData.goodsInfo?.is_best" type="primary" effect="dark"
+                                        size="small" class="mr5px">
                                         精选
                                     </el-tag>
                                     <el-tag v-if="goodsData.goodsInfo?.is_new" type="warning" effect="dark" size="small"
@@ -584,10 +576,34 @@ definePageMeta({
                             </li>
                             <li>
                                 <div class="lt">
+                                    商品品牌
+                                </div>
+                                <div class="gt">
+                                    {{ goodsData.goodsInfo?.brand_name }}
+                                </div>
+                            </li>
+                            <li>
+                                <div class="lt">
+                                    商品分类
+                                </div>
+                                <div class="gt">
+                                    {{ goodsData.goodsInfo?.cat_name }}
+                                </div>
+                            </li>
+                            <li>
+                                <div class="lt">
                                     商品型号
                                 </div>
                                 <div class="gt">
                                     {{ goodsData.goodsInfo?.goods_code }}
+                                </div>
+                            </li>
+                            <li>
+                                <div class="lt">
+                                    商品单位
+                                </div>
+                                <div class="gt">
+                                    {{ goodsData.goodsInfo?.unit }}
                                 </div>
                             </li>
                             <!-- <li>
@@ -624,8 +640,8 @@ definePageMeta({
                             <li>
                                 <div class="lt" />
                                 <div class="gt">
-                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" text bg size="large"
-                                        @click="onCollect">
+                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" text bg
+                                        size="large" @click="onCollect">
                                         <i class="i-carbon-favorite-filled mr3px" />
                                         收藏
                                     </el-button>
@@ -656,7 +672,8 @@ definePageMeta({
                         </ul>
                     </div>
                     <div class="goods-right">
-                        <img class="outline-1px outline-#e5e7eb outline-solid" src="~/assets/images/gyj-band.png" alt="">
+                        <img class="outline-1px outline-#e5e7eb outline-solid" src="~/assets/images/gyj-band.png"
+                            alt="">
                     </div>
                 </div>
                 <div class="goods-cont">
@@ -674,9 +691,9 @@ definePageMeta({
                                                 {{ item.goods_name }}
                                             </NuxtLink>
                                         </div>
-                                        <div class="pce">
+                                        <!-- <div class="pce">
                                             <span>￥{{ item.shop_price }}</span>
-                                        </div>
+                                        </div> -->
                                     </li>
                                 </ul>
                             </el-tab-pane>
@@ -708,10 +725,11 @@ definePageMeta({
                                                         <span>{{ scopes.row.content }}</span>
                                                     </template>
                                                 </el-table-column>
-                                                <el-table-column prop="" width="300" show-overflow-tooltip align="right">
+                                                <el-table-column prop="" width="300" show-overflow-tooltip
+                                                    align="right">
                                                     <template #default="scopes">
                                                         <span style="font-weight: 80;font-size: 12px;"> {{
-                                                                                                            changeToStar(scopes.row.user_name) }}
+                changeToStar(scopes.row.user_name) }}
                                                             {{ formatTime(scopes.row.add_time) }}</span>
                                                     </template>
                                                 </el-table-column>
@@ -728,7 +746,7 @@ definePageMeta({
                                     <el-table-column prop="" width="300" show-overflow-tooltip align="right">
                                         <template #default="scopes">
                                             <span style="font-weight: 80;font-size: 13px;"> {{
-                                                                                                changeToStar(scopes.row.user_name) }}
+                changeToStar(scopes.row.user_name) }}
                                                 {{ formatTime(scopes.row.add_time) }}</span>
                                         </template>
                                     </el-table-column>
@@ -741,8 +759,9 @@ definePageMeta({
                                     </el-table-column>
                                 </el-table>
                                 <div class="goods-pagination" mt15px>
-                                    <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize"
-                                        small background layout=" prev, pager, next,total, jumper" :total="defData.total"
+                                    <el-pagination v-model:current-page="defData.page"
+                                        v-model:page-size="defData.pageSize" size="small" background
+                                        layout=" prev, pager, next,total, jumper" :total="defData.total"
                                         @size-change="onHandleSizeChange" @current-change="onHandleSizeChange" />
                                 </div>
                             </el-tab-pane>
@@ -783,26 +802,28 @@ definePageMeta({
                 </el-dialog>
             </el-skeleton>
         </div>
+
+        <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
+            @close="onClose">
+            <el-form ref="formRef" :model="form" inline>
+                <el-form-item v-if="defData.type === 1" prop="content">
+                    <el-input v-model="form.question" style="width: 500px;margin-right: 10px;" placeholder="请输入您的问题吧~"
+                        clearable type="textarea" />
+                </el-form-item>
+
+                <el-form-item v-else prop="content">
+                    <el-input v-model="form.answer" type="textarea" style="width: 500px" placeholder="请输入您的回答~"
+                        clearable />
+                </el-form-item>
+                <el-form-item>
+                    <el-button style="background-color: var(--el-color-primary);color: white;" @click="answerClick">
+                        发布
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
     </section>
 
-    <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
-        @close="onClose">
-        <el-form ref="formRef" :model="form" inline>
-            <el-form-item v-if="defData.type === 1" prop="content">
-                <el-input v-model="form.question" style="width: 500px;margin-right: 10px;" placeholder="请输入您的问题吧~" clearable
-                    type="textarea" />
-            </el-form-item>
-
-            <el-form-item v-else prop="content">
-                <el-input v-model="form.answer" type="textarea" style="width: 500px" placeholder="请输入您的回答~" clearable />
-            </el-form-item>
-            <el-form-item>
-                <el-button style="background-color: var(--el-color-primary);color: white;" @click="answerClick">
-                    发布
-                </el-button>
-            </el-form-item>
-        </el-form>
-    </el-dialog>
 </template>
 
 <style lang="scss" scoped>
@@ -833,15 +854,14 @@ definePageMeta({
         width: calc(100% - var(--goods-img-zoom-width) - var(--goods-right-width) - var(--goods-cen-left-blank));
         margin-left: var(--goods-cen-left-blank);
         background-color: var(--el-color-white);
-        padding: 10px;
-        padding-left: 20px;
-        padding-top: 20px;
+        padding: 20px;
     }
 
     .goods-right {
         width: var(--goods-right-width);
         background-color: var(--el-color-white);
-        padding: 10px;
+        padding: 20px;
+        padding-left:0;
         display: flex;
         align-items: center;
     }
@@ -964,6 +984,7 @@ definePageMeta({
     .goods-lt-tabs {
         background-color: var(--el-color-white);
         min-height: 400px;
+        height: 100%;
     }
 
     .goods-gt-tabs {
@@ -989,7 +1010,7 @@ definePageMeta({
 
     .tle {
         height: 40px;
-        margin-bottom: 8px;
+        // margin-bottom: 8px;
 
         a {
             overflow: hidden;

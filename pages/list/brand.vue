@@ -58,9 +58,9 @@ const onHandleSizeChange = () => {
                     </div>
                 </div>
                 <div class="mt30px">
-                    <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
-                        layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
-                        @current-change="onHandleSizeChange" />
+                    <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" size="small"
+                        background layout=" prev, pager, next,total, jumper" :total="defData.total"
+                        @size-change="onHandleSizeChange" @current-change="onHandleSizeChange" />
                 </div>
             </el-skeleton>
         </div>

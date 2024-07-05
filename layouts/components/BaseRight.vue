@@ -23,7 +23,7 @@ const number = await useCartNumber.setCartNumber()
                 </NuxtLink>
             </li> -->
             <li>
-                <NuxtLink class="side-item" to="/order/list">
+                <NuxtLink class="side-item" to="/user">
                     <i class="i-ep-user-filled" />
                     <p class="text">
                         我的

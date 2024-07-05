@@ -1,4 +1,3 @@
-
 $bgColor: #fff;
 @forward "element-plus/theme-chalk/src/common/var.scss" with ($colors: ("primary": ("base": #d7231e),
         "success": ("base": #04ae8b),
@@ -9,4 +8,3 @@ $bgColor: #fff;
     ));
 
 @use "element-plus/theme-chalk/src/index.scss" as *;
-

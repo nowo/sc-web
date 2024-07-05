@@ -46,7 +46,7 @@ const onHandleSizeChange = () => {
                 </el-space>
             </div>
             <div class="goods-pagination" ml30px mt25px>
-                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
+                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" size="small" background
                     layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
                     @current-change="onHandleSizeChange" />
             </div>

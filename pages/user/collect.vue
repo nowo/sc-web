@@ -82,7 +82,7 @@ definePageMeta({
                 <el-breadcrumb-item>我的收藏</el-breadcrumb-item>
             </el-breadcrumb>
 
-            <!-- <ElTable ref="tableRef" :data="defData.tableData" class="mt25px">
+            <el-table ref="tableRef" :data="defData.tableData" class="mt25px" border>
                 <el-table-column prop="goods_name" label="商品名称" min-width="180">
                     <template #default="{ row }">
                         <div class="h50px flex">
@@ -116,11 +116,11 @@ definePageMeta({
                         </el-button>
                     </template>
                 </el-table-column>
-            </ElTable> -->
+            </el-table>
             <div class="goods-pagination mt10px">
-                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" small background
-                    layout=" prev, pager, next,total, jumper" :total="defData.total" @size-change="onHandleSizeChange"
-                    @current-change="onHandleSizeChange" />
+                <el-pagination v-model:current-page="defData.page" v-model:page-size="defData.pageSize" size="small"
+                    background layout=" prev, pager, next,total, jumper" :total="defData.total"
+                    @size-change="onHandleSizeChange" @current-change="onHandleSizeChange" />
             </div>
         </el-skeleton>
     </LayoutUser>

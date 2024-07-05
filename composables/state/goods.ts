@@ -17,6 +17,7 @@ export const useGoodsState = () => {
         // return goodsClassList
         if (goodsClassList.value.length) return goodsClassList
         const { data: cate, error } = await GoodsApi.getClass()
+        console.log(cate,error)
         // 接口发生错误时
         if (error.value) return goodsClassList
 

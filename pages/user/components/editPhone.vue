@@ -53,7 +53,7 @@ NowPhone()
 
 // 获取短信验证码 step1
 const getSmsCodeClick = async () => {
-    if (!form.phone) ElMessage.error('请先输入手机号码')
+    if (!form.phone) ElMessage.warning('请先输入手机号码')
     const data: LoginApi_validateCode = {
         type: 4,
         phone: form.phone,
@@ -100,7 +100,7 @@ const onClick = async () => {
 
 // 获取短信验证码 step2
 const getNewCodeClick = async () => {
-    if (!form.new_phone) ElMessage.error('请先输入手机号码')
+    if (!form.new_phone) ElMessage.warning('请先输入手机号码')
     const data: LoginApi_validateCode = {
         type: 4,
         phone: form.new_phone,
@@ -121,8 +121,8 @@ const getNewCodeClick = async () => {
 
 // 提交 step2
 const onEditClick = async () => {
-    if (!form.new_phone || !form.new_code) return ElMessage.error('必填项不能为空')
-    if (form.new_phone === defData.phone) return ElMessage.error('新手机号与当前手机号不能相同')
+    if (!form.new_phone || !form.new_code) return ElMessage.warning('必填项不能为空')
+    if (form.new_phone === defData.phone) return ElMessage.warning('新手机号与当前手机号不能相同')
 
     const data: AccountApi_editPhone = {
         phone: form.new_phone,

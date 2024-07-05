@@ -1,7 +1,7 @@
 <!-- 新增、修改地址 -->
 <script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
-import { CommonApi } from '~/api/common'
+import { requestRegionList } from '~/api/common'
 import { UserAddressApi } from '~/api/user/address'
 
 const emits = defineEmits<{
@@ -67,7 +67,7 @@ const comData = computed(() => {
 // 获取初始信息
 const initDefaultData = async () => {
     if (defData.ready) return false
-    const { data } = await CommonApi.getAllRegion()
+    const { data } = await requestRegionList()
     if (data.value?.code === 200) {
         defData.addressList = data.value.data
     } else {

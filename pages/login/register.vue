@@ -79,7 +79,7 @@ const onClose = () => {
 }
 // 获取短信验证码
 const getCodeClick = async () => {
-    if (!form.phone) ElMessage.error('请先输入手机号码')
+    if (!form.phone) ElMessage.warning('请先输入手机号码')
 
     const data: LoginApi_validateCode = {
         type: 1,
@@ -103,7 +103,7 @@ const getCodeClick = async () => {
 const onClick = async () => {
     const isVerify = await useFormVerify(formRef.value)
     if (!isVerify) return
-    if (form.agree === false) return ElMessage.error('请阅读并同意《工游记网站服务协议》《工游记隐私政策》')
+    if (form.agree === false) return ElMessage.warning('请阅读并同意《工游记网站服务协议》《工游记隐私政策》')
     const data: LoginApi_Login = {
         type: 3,
         phone: form.phone,

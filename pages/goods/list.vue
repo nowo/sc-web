@@ -202,12 +202,12 @@ const onAddCollect = async (row: GoodsApi_GetListItem) => {
 const onAddCart = async (row: GoodsApi_GetListItem) => {
     // 用户未登录时，不允许加入购物车页面
     if (!userState.token.value) {
-        // ElMessage.error('请先登录!')
+        // TODO 使用弹窗登陆效果更好
         return navigateTo('/login')
     }
     const price = row.shop_price || ''
     if (Number(price) <= 0) {
-        return ElMessage.error('商品价格不正确')
+        return ElMessage.warning('商品价格不正确')
     }
 
     const number = 1 // 默认加1购物车条目
@@ -531,7 +531,8 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                                 </div>
                                 <div class="goods-bot flex">
                                     <el-button :class="{ focus: item.is_collect }" @click="onAddCollect(item)">
-                                        <i :class="item.is_collect ? `i-carbon-favorite-filled` : 'i-carbon-favorite'" />
+                                        <i
+                                            :class="item.is_collect ? `i-carbon-favorite-filled` : 'i-carbon-favorite'" />
                                     </el-button>
                                     <!-- v-if="item.is_collect"
                                     <el-button v-else>
@@ -554,7 +555,7 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                 </div>
                 <div v-if="form.total" class="goods-pagination">
                     <el-pagination v-model:current-page="form.page" v-model:page-size="form.pageSize"
-                        :page-sizes="form.pageSizes" background small layout="total, prev, pager, next, jumper"
+                        :page-sizes="form.pageSizes" background size="small" layout="total, prev, pager, next, jumper"
                         :total="form.total" @size-change="onHandleSizeChange" @current-change="onHandleSizeChange" />
                 </div>
             </el-skeleton>

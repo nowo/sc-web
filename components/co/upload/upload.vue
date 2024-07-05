@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { UploadFile, UploadFiles } from 'element-plus'
 import { computed, reactive, watch } from 'vue'
-import { CommonApi } from '@/api/common'
+import { requestUploadFile } from '@/api/common'
 
 interface AllFileList {
     url: string // 服务器文件地址
@@ -77,7 +77,7 @@ const onImgChange = async (file: UploadFile, files: UploadFiles) => {
 
     const formData = new FormData()
     formData.append('image', file.raw as File)
-    const { data: uploadInfo } = await CommonApi.upload(formData)
+    const { data: uploadInfo } = await requestUploadFile(formData)
 
     if (uploadInfo.value?.code !== 200) return ElMessage.error(uploadInfo.value?.msg)
 

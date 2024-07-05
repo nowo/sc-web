@@ -3,7 +3,7 @@
  */
 export const AccountApi = {
     // 用户信息
-    userInfo: () => useHttp<AccountApi_userInfoResponse>('/api/mall/get_user_info', '', { method: 'get' }),
+    // userInfo: () => useHttp<AccountApi_userInfoResponse>('/api/mall/get_user_info', '', { method: 'get' }),
     // 用户信息 -- 编辑
     editInfo: (data: RequestDataType<AccountApi_editInfo>) => useHttp('/api/mall/edit_user', data, { method: 'post' }),
     // 用户信息 -- 修改密码
@@ -20,3 +20,6 @@ export const AccountApi = {
     VerifyEmail: (data: RequestDataType<AccountApi_VerifyEmail>) => useHttp('/api/index/verify_email', data, { method: 'post' }),
 
 }
+
+
+export const requestUserInfo=() => useHttp<AccountApi_userInfoResponse>('/api/mall/get_user_info', '', { method: 'get' })

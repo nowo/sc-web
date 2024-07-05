@@ -216,7 +216,7 @@ const onClose = () => {
 
 // 确认
 const onConfirm = async () => {
-    // if (!defData.multipleSelect.length) return ElMessage.error('请先选择需要退换的商品')
+    // if (!defData.multipleSelect.length) return ElMessage.warning('请先选择需要退换的商品')
 
     const isRun = await useFormVerify(formRef.value)
     if (!isRun) return false

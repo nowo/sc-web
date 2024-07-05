@@ -69,7 +69,7 @@ const onRemove = async (row: GoodsTableCartItem | 'all') => {
         initTableData() // 重新获取列表数据
         useCartNumber.setCartNumber() // 更新购物车数量
     } else {
-        ElMessage.error(data.value?.msg) // 提示错误消息 或者 显示错误消息 或者 显示
+        ElMessage.error(data.value?.msg) 
     }
 }
 

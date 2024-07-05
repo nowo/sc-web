@@ -70,7 +70,7 @@ const getReason = async () => {
 
 const initTableData = async () => {
     const main_order_no = form.data.order_no
-    if (!main_order_no) return ElMessage.error('请先输入订单编号')
+    if (!main_order_no) return ElMessage.warning('请先输入订单编号')
     const { data: res } = await OrderReturnApi.getList({ main_order_no })
 
     if (res.value?.code !== 200) return ElMessage.error(res.value?.msg)
@@ -106,7 +106,7 @@ const onClose = () => {
 
 // 确认
 const onConfirm = async () => {
-    if (!defData.multipleSelect.length) return ElMessage.error('请先选择需要退换的商品')
+    if (!defData.multipleSelect.length) return ElMessage.warning('请先选择需要退换的商品')
 
     const isRun = await useFormVerify(formRef.value)
     if (!isRun) return false

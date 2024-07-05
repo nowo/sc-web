@@ -148,7 +148,7 @@ const onCloseWechatPay = () => {
 // 支付
 const onPayment = async () => {
     if (!order_no.value) return
-    if (!form.payType) return ElMessage.error('请选择支付方式')// 验证选择的支付方式是否选择了支付方式
+    if (!form.payType) return ElMessage.warning('请选择支付方式')// 验证选择的支付方式是否选择了支付方式
     defData.submit = true
     const { data: res, error } = await OrderApi.payOrder({ main_order_no: order_no.value, pay_type: form.payType })
     defData.submit = false
@@ -160,7 +160,7 @@ const onPayment = async () => {
         const dat = res.value?.data as OrderApi_PayOrderWeChatResponse
         const url = dat.code_url
         // const url = dat.code_url ? `${dat.code_url}&_tcs=${Date.now()}` : ''
-        if (!url) return ElMessage.error('未获取到付款码，请稍后再试')
+        if (!url) return ElMessage.warning('未获取到付款码，请稍后再试')
         defData.chatPayUrl = await QRCode.toDataURL(url, { margin: 2 })
 
         defData.visibleChat = true

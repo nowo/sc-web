@@ -133,6 +133,8 @@ declare interface GoodsApi_GetInfoResponse {
         goods_img: '' // 主图
         shop_price: '0.00' // 本店价
     }[] // 商品关联列表
+    brand_name:string,  // 品牌名称
+    cat_name:string,  // 分类名称
 }
 
 declare interface GoodsApi_GoodsInfoData {
@@ -160,6 +162,10 @@ declare interface GoodsApi_GoodsInfoData {
         is_threshold: 1
         lowest: 1
     }[] // 优惠券
+    unit:string,    // 单位
+    // goods_weight: number // 商品重量
+    brand_name:string,  // 品牌名称
+    cat_name:string,  // 分类名称
 }
 
 // 页面 ///////////////////////////////////////////////////////

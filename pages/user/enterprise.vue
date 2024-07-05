@@ -26,7 +26,7 @@ const userStatus = async () => {
         defData.attest_status = user.value.attest_status
         defData.enterprise_name = user.value.enterprise_name
     } else {
-        return ElMessage.error('请先登录')
+        return ElMessage.warning('请先登录')
     }
     await wait(10)
     defData.skeleton = false

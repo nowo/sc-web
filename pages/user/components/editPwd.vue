@@ -29,7 +29,7 @@ const rules = reactive<FormRules>({
 const editPwd = async () => {
     const isVerify = await useFormVerify(formRef.value)
     if (!isVerify) return
-    if (form.confirm_password !== form.password) return ElMessage.error('密码不一致')
+    if (form.confirm_password !== form.password) return ElMessage.warning('密码不一致')
 
     const data: AccountApi_editPwd = {
         password: form.password,

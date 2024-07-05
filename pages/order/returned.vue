@@ -89,7 +89,7 @@ const stepSelect = computed(() => {
 const initDefaultData = async () => {
     // if (defData.ready) return false
     const refund_no = return_no.value?.trim() ?? ''
-    if (!refund_no) return ElMessage.error('退换单号错误')
+    if (!refund_no) return ElMessage.warning('退换单号错误')
     const { data, error } = await OrderReturnApi.info({ refund_no })
 
     await wait(100)

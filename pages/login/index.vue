@@ -110,7 +110,7 @@ const loginClick = () => {
 
 // 获取短信验证码
 const getCodeClick = async () => {
-    if (!form.phone) ElMessage.error('请先输入手机号码')
+    if (!form.phone) ElMessage.warning('请先输入手机号码')
     const data: LoginApi_validateCode = {
         type: 2,
         phone: form.phone,

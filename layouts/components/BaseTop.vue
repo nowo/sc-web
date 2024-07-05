@@ -50,7 +50,7 @@ const onLoginOut = async () => {
                     <span>广东省/深圳市</span>
                 </el-button>
                 <el-divider direction="vertical" /> -->
-                <template v-if="userState.token && username">
+                <!-- <template v-if="userState.token && username">
                     <NuxtLink to="/order/list" class="hov-item">
                         我的订单
                     </NuxtLink>
@@ -60,7 +60,7 @@ const onLoginOut = async () => {
                     <i class="i-ep-shopping-cart-full mr2px" />
                     <span>购物车({{ number }})</span>
                 </NuxtLink>
-                <el-divider direction="vertical" />
+                <el-divider direction="vertical" /> -->
                 <NuxtLink to="/list/site" class="hov-item">
                     网站导航
                 </NuxtLink>

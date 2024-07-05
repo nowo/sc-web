@@ -49,7 +49,7 @@ const rules = reactive<FormRules>({
 
 // 获取短信验证码 step1
 const getSmsCodeClick = async () => {
-    if (!form.phone) ElMessage.error('请先输入手机号码')
+    if (!form.phone) ElMessage.warning('请先输入手机号码')
     const data: LoginApi_validateCode = {
         type: 3,
         phone: form.phone,
@@ -100,7 +100,7 @@ const onClick = async () => {
 const onEditClick = async () => {
     const isVerify = await useFormVerify(formRef.value)
     if (!isVerify) return
-    if (form.define_password !== form.password) return ElMessage.error('密码不一致')
+    if (form.define_password !== form.password) return ElMessage.warning('密码不一致')
     const data: LoginApi_submitPas = {
         code: defData.code,
         phone: defData.phone,
@@ -118,7 +118,7 @@ const onEditClick = async () => {
     <div class="container">
         <div style="height: 650px;background-color: white;margin: 10px 0;">
             <div class="pr5px pt5px text-right">
-                <NuxtLink to="/login">
+                <NuxtLink to="/login" class="hover:color-[--el-color-primary]">
                     已有账号，去登录
                 </NuxtLink>
             </div>

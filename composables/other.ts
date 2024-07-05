@@ -66,7 +66,7 @@ export const useFormVerify = async (formEl: FormInstance | undefined) => {
             const obj: any = fields
             const firstKey = Object.keys(obj)[0]
             const text = obj[firstKey][0].message
-            ElMessage.error(text)
+            ElMessage.warning(text)
             isVerify = false
             // return false
         }

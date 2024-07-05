@@ -30,7 +30,7 @@ const searchHotList = computed(() => {
 // 搜索
 const onSearch = (row?: any | '') => {
     const queryStr = search.keyword?.trim() ?? ''
-    if (!queryStr) return ElMessage.error('请输入商品关键词')
+    if (!queryStr) return ElMessage.warning('请输入商品关键词')
 
     const node: GoodsSearchItem = {
         id: row?.id ?? 0,
@@ -168,7 +168,7 @@ onMounted(async () => {
                     <client-only>
                         <ElAutocomplete ref="autocompleteRef" v-model="search.keyword"
                             :fetch-suggestions="querySearchAsync" popper-class="pop-search" class="w100%"
-                            :debounce="800" fit-input-width placeholder="" select-when-unmatched label="test"
+                            :debounce="800" fit-input-width placeholder="" select-when-unmatched
                             @select="onSearch">
                             <template #prefix>
                                 <i class="i-ep-search" />
@@ -223,7 +223,7 @@ onMounted(async () => {
                             </el-button>
                         </el-badge>
                     </NuxtLink> -->
-                    <NuxtLink to="/order/history">
+                    <NuxtLink to="/user/history">
                         <el-button type="primary" class="min-w150px">
                             <i class="i-ep-shopping-cart-full mr8px" />
                             历史记录

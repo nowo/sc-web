@@ -12,7 +12,7 @@
                     </div>
                     <el-divider border-style="dotted" class="m0!" />
                     <div class="pb15px">
-                        <dl class="dl-list">
+                        <dl v-if="0" class="dl-list">
                             <dt>
                                 <i class="i-ep-house inline-block" />
                                 订单中心
@@ -48,7 +48,7 @@
                                 </NuxtLink>
                             </dd>
                         </dl>
-                        <dl class="dl-list">
+                        <dl v-if="0" class="dl-list">
                             <dt>
                                 <i class="i-ep-user inline-block" />
                                 企业用户
@@ -80,7 +80,7 @@
                                 </NuxtLink>
                             </dd>
                         </dl>
-                        <dl class="dl-list">
+                        <dl v-if="0" class="dl-list">
                             <dt>
                                 <i class="i-ep-memo inline-block" />
                                 账户管理
@@ -113,7 +113,7 @@
                         </dl>
                     </div>
                 </el-aside>
-                <el-main class="right">
+                <el-main class="right min-h-450px">
                     <slot />
                 </el-main>
             </el-container>
