@@ -460,8 +460,9 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                             </div>
                             <div class="g-price w150px text-center">
                                 <div class="g-price-1">
-                                    <i>￥</i>
-                                    <span>{{ formatNumber(item.shop_price) }}</span>
+                                    <!-- <i>￥</i>
+                                    <span>{{ formatNumber(item.shop_price) }}</span> -->
+                                    -
                                     <!-- <span class="integer">157</span><span class="decimal">.90</span><span
                                         class="unit">/个</span> -->
                                 </div>
@@ -475,14 +476,14 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                                 </div> -->
                             </div>
                             <div class="flex-1 text-center">
-                                <el-button :class="{ focus: item.is_collect }" @click="onAddCollect(item)">
+                                <el-button :class="{ focus: item.is_collect }" class="w100%" @click="onAddCollect(item)">
                                     <i :class="item.is_collect ? `i-carbon-favorite-filled` : 'i-carbon-favorite'" />
+                                    <span class="ml5px">收藏</span>
                                 </el-button>
-                                <el-button type="primary" @click="onAddCart(item)">
+                                <!-- <el-button type="primary" @click="onAddCart(item)">
                                     <i class="i-carbon-shopping-cart" />
-                                    <!-- <i class="i-ic-outline-shopping-cart"></i> -->
                                     加入购物车
-                                </el-button>
+                                </el-button> -->
                                 <!-- <br> -->
                                 <!-- <el-button v-if="item.goods_id % 2" class="focus">
                                     <i class="i-carbon-favorite-filled" />
@@ -502,7 +503,7 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                                 <NuxtLink :to="`/goods/${item.goods_sn}`" target="_blank">
                                     <CoImage class="hov-img w100% pb100%" :src="item.goods_img" loading="lazy" />
                                 </NuxtLink>
-                                <div class="goods-price">
+                                <div v-if="0" class="goods-price">
                                     <div class="goods-price-left">
                                         <i>￥</i><span class="integer">{{ formatNumber(item.shop_price) }}</span>
                                         <!-- <span class="unit">/台</span> -->
@@ -530,19 +531,19 @@ watch(() => [keyword.value, cid.value, bid.value], () => {
                                     </p>
                                 </div>
                                 <div class="goods-bot flex">
-                                    <el-button :class="{ focus: item.is_collect }" @click="onAddCollect(item)">
+                                    <el-button :class="{ focus: item.is_collect }" class="w100%" @click="onAddCollect(item)">
                                         <i
                                             :class="item.is_collect ? `i-carbon-favorite-filled` : 'i-carbon-favorite'" />
+                                                                                <span class="ml5px">收藏</span>
                                     </el-button>
                                     <!-- v-if="item.is_collect"
                                     <el-button v-else>
                                         <i class="i-carbon-favorite" />
                                     </el-button> -->
-                                    <el-button class="flex-1" @click="onAddCart(item)">
+                                    <!-- <el-button class="flex-1" @click="onAddCart(item)">
                                         <i class="i-carbon-shopping-cart" />
-                                        <!-- <i class="i-ic-outline-shopping-cart"></i> -->
                                         加入购物车
-                                    </el-button>
+                                    </el-button> -->
                                 </div>
                             </div>
                         </li>

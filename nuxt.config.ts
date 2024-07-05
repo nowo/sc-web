@@ -81,13 +81,13 @@ export default defineNuxtConfig({
 
     vite: {
         // additionalData: `@use "@/assets/scss/element/index.scss" as element;`,
-        css: {
-            preprocessorOptions: {
-                scss: {
-                    additionalData: '@use "@/assets/scss/default.scss" as element;',
-                },
-            },
-        },
+        // css: {
+        //     preprocessorOptions: {
+        //         scss: {
+        //             additionalData: '@use "@/assets/scss/default.scss" as element;',
+        //         },
+        //     },
+        // },
 
         server: {
             proxy: {

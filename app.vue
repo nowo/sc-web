@@ -2,7 +2,7 @@
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
 // import '@unocss/reset/tailwind.css'
-// import '~/assets/scss/default.scss'
+import '~/assets/scss/default.scss'
 import '~/assets/scss/app.scss'
 
 const locale = ref(zhCn)

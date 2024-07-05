@@ -12,8 +12,8 @@ const tableData = reactive<BaseTableDataType<TableDataItem>>({
     data: [],
     tableHeader: [
         { property: 'goods_name', label: '商品名称', minWidth: 180, slot: true },
-        { property: 'shop_price', label: '价格', width: 120, align: 'center' },
-        { property: 'recent_time', label: '浏览时间', width: 160, slot: true },
+        // { property: 'shop_price', label: '价格', width: 120, align: 'center' },
+        { property: 'recent_time', label: '浏览时间', width: 170, slot: true },
         { property: 'operate', label: '操作', width: 100, align: 'center', slot: true, fixed: 'right' },
     ],
     pagination: {

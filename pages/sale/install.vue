@@ -39,7 +39,7 @@ const form = reactive({
 })
 
 const defData = reactive({
-    addressList: [] as CommonApi_GetAllRegionItem[],
+    // addressList: [] as CommonApi_GetAllRegionItem[],
     goodsList: [] as SaleAfterApi_SearchResponse['list'],
     goodsSearchList: [] as SaleAfterApi_SearchResponse['list'],
 
@@ -51,15 +51,9 @@ const defData = reactive({
 })
 
 // 获取省市区数据
-const initDefaultData = async () => {
-    const { data } = await requestRegionList()
-    if (data.value?.code === 200) {
-        defData.addressList = data.value.data
-    } else {
-        ElMessage.error(data.value?.msg)
-    }
-}
-initDefaultData()
+const { data } = await requestRegionList()
+const addressList=computed(()=>data.value?.data||[])
+
 
 // 获取短信验证码
 const getCodeClick = async () => {
@@ -176,7 +170,7 @@ definePageMeta({
                     <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
                     <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
                         <el-form-item label="省市区" prop="provinceArr">
-                            <el-cascader v-model="form.data.provinceArr" :options="defData.addressList"
+                            <el-cascader v-model="form.data.provinceArr" :options="addressList as any"
                                 :props="{ value: 'cityName', label: 'cityName' }" class="w100%" clearable filterable />
                         </el-form-item>
                     </el-col>
@@ -186,15 +180,15 @@ definePageMeta({
                                 show-word-limit />
                         </el-form-item>
                     </el-col>
-                    <!-- <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20"> -->
-                    <el-form-item label="商品关键字" prop="goods_id">
-                        <el-select v-model="form.data.goods_id" placeholder="请输入商品关键字" style="width: 500px"
-                            :remote-method="remoteMethod" :loading="defData.loading" filterable clearable remote
-                            reserve-keyword>
-                            <el-option v-for="item in defData.goodsList" :key="item.goods_id" :label="item.goods_name"
-                                :value="item.goods_id" />
-                        </el-select>
-                    </el-form-item>
+                    <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
+                        <el-form-item label="商品名称" prop="goods_id">
+                            <el-select v-model="form.data.goods_id" placeholder="请输入商品关键字" :remote-method="remoteMethod"
+                                :loading="defData.loading" filterable clearable remote reserve-keyword>
+                                <el-option v-for="item in defData.goodsList" :key="item.goods_id"
+                                    :label="item.goods_name" :value="item.goods_id" />
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
                     <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
                         <el-form-item label="需求详细描述" prop="describe">
                             <el-input v-model="form.data.describe" type="textarea" show-word-limit maxlength="200"
@@ -220,25 +214,26 @@ definePageMeta({
                     <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
                     <el-col :xs="24" :sm="12" :md="12" :lg="11" :xl="11">
                         <el-form-item label="验证码" prop="validate_code">
-                            <el-col :span="15">
+                            <div class="flex">
                                 <el-input v-model.trim="form.data.validate_code" type="text" placeholder="请输入短信验证码"
-                                    clearable tabindex="3" />
-                            </el-col>
-                            <el-col :span="1" />
-                            <el-col :span="8">
-                                <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
-                                    获取验证码
-                                </el-button>
-                                <el-button v-else class="w100%">
-                                    {{ defData.time }}秒
-                                </el-button>
-                            </el-col>
+                                    clearable tabindex="3" class="w200px" />
+                                <div class="pl15px">
+                                    <el-button v-if="defData.sendCode" class="w100%" @click="getCodeClick">
+                                        获取验证码
+                                    </el-button>
+                                    <el-button v-else class="w100%">
+                                        {{ defData.time }}秒
+                                    </el-button>
+                                </div>
+                            </div>
+
                         </el-form-item>
                     </el-col>
                     <el-col :xs="0" :sm="12" :md="12" :lg="11" :xl="11" />
                     <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">
                         <el-form-item label="预约上门时间" prop="ask_date">
-                            <el-date-picker v-model="form.data.ask_date" type="datetime" value-format="YYYY-MM-DD HH:mm" />
+                            <el-date-picker v-model="form.data.ask_date" type="datetime"
+                                value-format="YYYY-MM-DD HH:mm" />
                         </el-form-item>
                     </el-col>
                     <el-col :xs="24" :sm="20" :md="20" :lg="20" :xl="20">

@@ -225,8 +225,8 @@ onMounted(async () => {
                     </NuxtLink> -->
                     <NuxtLink to="/user/history">
                         <el-button type="primary" class="min-w150px">
-                            <i class="i-ep-shopping-cart-full mr8px" />
-                            历史记录
+                            <i class="i-ep-list mr8px" />
+                            浏览历史
                         </el-button>
                     </NuxtLink>
                 </div>

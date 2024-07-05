@@ -85,7 +85,7 @@ definePageMeta({
             <el-table ref="tableRef" :data="defData.tableData" class="mt25px" border>
                 <el-table-column prop="goods_name" label="商品名称" min-width="180">
                     <template #default="{ row }">
-                        <div class="h50px flex">
+                        <div class="flex  items-center">
                             <div class="goods_img">
                                 <el-image class="h50px w50px" :src="row.goods_img" />
                             </div>
@@ -97,14 +97,14 @@ definePageMeta({
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="shop_price" label="价格" width="120" align="center">
+                <!-- <el-table-column prop="shop_price" label="价格" width="120" align="center">
                     <template #default="{ row }">
                         <div class="shop_price">
                             {{ row.shop_price }}
                         </div>
                     </template>
-                </el-table-column>
-                <el-table-column prop="collect_time" label="收藏时间" width="170px" align="center">
+                </el-table-column> -->
+                <el-table-column prop="collect_time" label="收藏时间" width="170px">
                     <template #default="{ row }">
                         {{ formatTime(row.collect_time) }}
                     </template>

@@ -10,7 +10,7 @@ const { data: menu } = await HomeApi.getNav()
 <template>
     <nav class="nav-box min-h48px">
         <ClientOnly>
-            <NuxtLink v-for="item in menu?.data" :key="item.nav_id" :to="item.nav_url">
+            <NuxtLink v-for="item in menu?.data" :key="item.nav_id" :to="item.nav_url" :target="item.is_blank?'_blank':''">
                 {{ item.nav_name }}
             </NuxtLink>
         </ClientOnly>

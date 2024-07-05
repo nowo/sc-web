@@ -25,7 +25,8 @@ declare interface HomeApi_GetNavResponse {
     nav_id: 2
     nav_name: '折扣专区'
     nav_url: 'https://www.baidu.com/'
-    sort: 10
+    sort: 10,
+    is_blank:0|1, // 是否新窗口打开：0否，1是
 }
 
 /**

@@ -16,17 +16,22 @@ export const useGoodsState = () => {
     const getGoodsClass = async () => {
         // return goodsClassList
         if (goodsClassList.value.length) return goodsClassList
-        const { data: cate, error } = await GoodsApi.getClass()
-        console.log(cate,error)
+        const { data: cate, error,status } = await GoodsApi.getClass()
+        console.log(status)
+        console.log(cate.value,error.value)
         // 接口发生错误时
         if (error.value) return goodsClassList
-
-        if (cate.value?.code === 200) {
-            goodsClassList.value = cate.value.data
-        } else {
-            ElMessage.error(cate.value?.msg)
-            goodsClassList.value = []
-        }
+        watch(status, (newVal) => {
+            if(newVal=='success'){
+                if (cate.value?.code === 200) {
+                    goodsClassList.value = cate.value.data
+                } else {
+                    // console.log('cate.value :>> ', cate.value);
+                    ElMessage.error(cate.value?.msg)
+                    goodsClassList.value = []
+                }
+            }
+        })
         return goodsClassList
     }
 

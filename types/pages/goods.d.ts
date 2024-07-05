@@ -164,8 +164,8 @@ declare interface GoodsApi_GoodsInfoData {
     }[] // 优惠券
     unit:string,    // 单位
     // goods_weight: number // 商品重量
-    brand_name:string,  // 品牌名称
-    cat_name:string,  // 分类名称
+    brand_name?:string,  // 品牌名称
+    cat_name?:string,  // 分类名称
 }
 
 // 页面 ///////////////////////////////////////////////////////

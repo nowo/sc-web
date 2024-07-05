@@ -59,11 +59,11 @@ const { data, error, status } = await GoodsApi.getInfo({ goods_sn })
 // 商品信息
 const goodsData = computed(() => {
 
-    const goodsInfo = {
-        ...data.value?.data?.goods_info,
-        cat_name: data.value?.data.cat_name,
-        brand_name: data.value?.data.brand_name,
-    }
+    const goodsInfo = data.value?.data?.goods_info as GoodsApi_GoodsInfoData
+
+    goodsInfo.cat_name = data.value?.data.cat_name
+    goodsInfo.brand_name = data.value?.data.brand_name
+
 
     const id = data.value?.data?.goods_info.goods_id || 0
     const photoList: string[] = goodsInfo?.goods_img ? [goodsInfo?.goods_img] : []
@@ -640,12 +640,12 @@ definePageMeta({
                             <li>
                                 <div class="lt" />
                                 <div class="gt">
-                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" text bg
-                                        size="large" @click="onCollect">
+                                    <el-button v-if="goodsData.goodsInfo?.is_collect" type="primary" plain size="large" class="min-w120px"
+                                        @click="onCollect">
                                         <i class="i-carbon-favorite-filled mr3px" />
                                         收藏
                                     </el-button>
-                                    <el-button v-else text bg size="large" @click="onCollect">
+                                    <el-button v-else size="large" class="min-w120px" @click="onCollect">
                                         <i class="i-carbon-favorite mr3px" />
                                         收藏
                                     </el-button>
@@ -768,7 +768,7 @@ definePageMeta({
                         </el-tabs>
                     </div>
                 </div>
-                <el-dialog v-if="CLIENT" v-model="defData.shareVisible" title="分享给好友" width="450px" draggable>
+                <el-dialog v-model="defData.shareVisible" title="分享给好友" width="450px" draggable>
                     <el-form class="-mt20px" label-position="top">
                         <el-form-item label="链接地址">
                             <el-input v-model="defData.shareLink" class="pr12px w70%!" disabled />
@@ -800,28 +800,28 @@ definePageMeta({
                 <el-dialog v-model="defData.visibleLogin" width="450px" title="">
                     <UserLogin ref="loginRef" class="goods-login" @update="onUserLogin" />
                 </el-dialog>
+                <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
+                    @close="onClose">
+                    <el-form ref="formRef" :model="form" inline>
+                        <el-form-item v-if="defData.type === 1" prop="content">
+                            <el-input v-model="form.question" style="width: 500px;margin-right: 10px;"
+                                placeholder="请输入您的问题吧~" clearable type="textarea" />
+                        </el-form-item>
+
+                        <el-form-item v-else prop="content">
+                            <el-input v-model="form.answer" type="textarea" style="width: 500px" placeholder="请输入您的回答~"
+                                clearable />
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button style="background-color: var(--el-color-primary);color: white;"
+                                @click="answerClick">
+                                发布
+                            </el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-dialog>
             </el-skeleton>
         </div>
-
-        <el-dialog v-model="defData.visible" auto-height width="680px" :draggable="true" :title="comData.title"
-            @close="onClose">
-            <el-form ref="formRef" :model="form" inline>
-                <el-form-item v-if="defData.type === 1" prop="content">
-                    <el-input v-model="form.question" style="width: 500px;margin-right: 10px;" placeholder="请输入您的问题吧~"
-                        clearable type="textarea" />
-                </el-form-item>
-
-                <el-form-item v-else prop="content">
-                    <el-input v-model="form.answer" type="textarea" style="width: 500px" placeholder="请输入您的回答~"
-                        clearable />
-                </el-form-item>
-                <el-form-item>
-                    <el-button style="background-color: var(--el-color-primary);color: white;" @click="answerClick">
-                        发布
-                    </el-button>
-                </el-form-item>
-            </el-form>
-        </el-dialog>
     </section>
 
 </template>
@@ -861,7 +861,7 @@ definePageMeta({
         width: var(--goods-right-width);
         background-color: var(--el-color-white);
         padding: 20px;
-        padding-left:0;
+        padding-left: 0;
         display: flex;
         align-items: center;
     }
